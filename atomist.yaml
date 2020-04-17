@@ -1,0 +1,68 @@
+skill:
+  name: atomist/owasp-dependency-check
+  title: Run Owasp Dependency-Check Scan on new Pushes
+  version: 0.1.0
+  author: Atomist
+  description: |
+    Run [dependency-check](https://jeremylong.github.io/DependencyCheck/) scans on repo Pushes.
+    This skill looks for Repos containing projects that contain
+    * a gradle file with the plugin `org.owasp.dependencycheck`
+    * a maven pom.xml with `dependency-check-maven` plugin goal named `check`
+    * a Leiningen project with the `[com.livingsocial/lein-dependency-check "1.1.4"]` plugin
+    and if any of these are found, the owasp dependency check is scanned.
+  category:
+    - productivity
+  technology:
+    - npm
+    - javascript
+  license: Apache-2.0
+  homepage: https://github.com/atomist-skills/clojure-skill
+  repository: https://github.com/atomist-skills/clojure-skill.git
+  icon: https://jeremylong.github.io/DependencyCheck/images/dc.svg
+ 
+  package:
+    use: atomist/package-docker-skill
+    
+parameters:
+  - repoFilter:
+      description: "The set of Repositories."
+      displayName: "Repository Scope"
+      name: "scope"
+      required: true
+
+artifacts:
+  docker:
+    - name: skill
+      image: owasp/dependency-check
+
+subscriptions:
+  - >-
+    subscription deployOnPush {
+        Push {
+            repo {
+                owner
+                name
+                id
+                channels {
+                  channelId
+                  id
+                  name
+                  normalizedName
+                  provider
+                  team {
+                    id
+                    name
+                  }
+                }
+                org {
+                    provider {
+                        apiUrl
+                    }
+                }
+            }
+            branch
+            after {
+                sha
+            }
+        }
+    }

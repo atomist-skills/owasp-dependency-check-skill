@@ -1,0 +1,11 @@
+.cpcache/
+node_modules/
+out/
+target/
+.idea/
+*.iml
+.shadow-cljs/
+.nrepl-port
+index.js
+classes
+.clj-kondo
