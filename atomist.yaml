@@ -1,7 +1,7 @@
 skill:
   name: atomist/owasp-dependency-check
   title: Run Owasp Dependency-Check Scan on new Pushes
-  version: 0.1.0
+  version: 0.1.1
   author: Atomist
   description: |
     Run [dependency-check](https://jeremylong.github.io/DependencyCheck/) scans on repo Pushes.
