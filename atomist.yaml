@@ -19,10 +19,10 @@ skill:
   homepage: https://github.com/atomist-skills/clojure-skill
   repository: https://github.com/atomist-skills/clojure-skill.git
   icon: https://jeremylong.github.io/DependencyCheck/images/dc.svg
- 
+
   package:
     use: atomist/package-docker-skill
-    
+
 parameters:
   - repoFilter:
       description: "The set of Repositories."
@@ -66,4 +66,3 @@ subscriptions:
             }
         }
     }
-    
