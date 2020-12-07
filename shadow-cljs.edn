@@ -12,14 +12,15 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-{
- :artifacts {:docker {}}
- :namespace "atomist"
- :homepageUrl "https://github.com/atomist-skills/owasp-dependency-check-skill"
- :name "owasp-dependency-check-skill"
- :displayName "owasp dependency check skill"
- :description "This section supports markdown"
- :author "slimslenderslacks"
- :license "unknown"
- :iconUrl "https://raw.githubusercontent.com/cljs/logo/master/cljs.png"
-}
+{:deps true,
+ :builds
+ {:dev
+  {:target :node-library,
+   :exports {:handler atomist.main/handler},
+   :output-to "index.js"},
+  :release
+  {:target :node-script,
+   :output-to "index.js",
+   :exports {:handler atomist.main/handler},
+   :compiler-options {:optimizations :advanced}
+   :main atomist.main/handler}}}
