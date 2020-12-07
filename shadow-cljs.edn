@@ -22,5 +22,5 @@
   {:target :node-script,
    :output-to "index.js",
    :exports {:handler atomist.main/handler},
-   :compiler-options {:optimizations :advanced}
+   :compiler-options {:optimizations :simple}
    :main atomist.main/handler}}}
