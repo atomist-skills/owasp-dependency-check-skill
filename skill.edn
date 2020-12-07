@@ -13,7 +13,13 @@
 ;; limitations under the License.
 
 {
- :artifacts {:docker {}}
+ :artifacts {:docker {}
+             :gcf [{:name "owasp-dependency-check-skill",
+  :runtime "nodejs10",
+  :memory 512, 
+  :timeout 60, 
+  :entryPoint "eventhandler"}]
+}
  :namespace "atomist"
  :homepageUrl "https://github.com/atomist-skills/owasp-dependency-check-skill"
  :name "owasp-dependency-check-skill"
