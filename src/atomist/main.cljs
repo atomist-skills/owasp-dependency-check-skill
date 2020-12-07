@@ -26,11 +26,11 @@
   [handler]
   (fn [request]
     (go
-     (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
-       (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
-                                         :owner (-> repo :git.repo/org :git.org/name)
-                                         :sha sha}
-                                   :token (-> repo :git.repo/org :github.org/installation-token))))))))
+      (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
+        (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
+                                          :owner (-> repo :git.repo/org :git.org/name)
+                                          :sha sha}
+                            :token (-> repo :git.repo/org :github.org/installation-token))))))))
 
 (defn run-scan [handler]
   (fn [request]
