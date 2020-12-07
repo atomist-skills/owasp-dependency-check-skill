@@ -2,7 +2,6 @@
 
 <!---atomist-skill-readme:start--->
 
-
 <!---atomist-skill-readme:end--->
 
 ## Links
