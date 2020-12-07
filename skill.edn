@@ -21,6 +21,25 @@
  :author "slimslenderslacks"
  :license "unknown"
  :iconUrl "https://images.atomist.com/rug/atomist.png"
+ :resourceProviders
+ [{:name "github",
+   :description "GitHub",
+   :typeName "GitHubAppResourceProvider",
+   :minRequired 1,
+   :maxAllowed 1}]
+ :parameters
+ [{:stringArray
+   {:name "path-not-exists"
+    :displayName "Do not deploy from any repos that contain files from this set of glob expressions"
+    :description "Existence of these files means that this tag should be skipped"
+    :placeHolder "Dockerfile"
+    :required false}}
+  {:stringArray
+   {:name "branch-filters"
+    :displayName "Do not deploy from any repos that contain files from this set of glob expressions"
+    :description "Existence of these files means that this tag should be skipped"
+    :placeHolder "Dockerfile"
+    :required false}}]
  :artifacts [{:docker
               {:name "owasp-dependency-check-skill"
                :image "gcr.io/atomist-container-skills/owasp-dependency-check-skill"

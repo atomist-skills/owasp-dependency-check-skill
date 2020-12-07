@@ -19,20 +19,32 @@
             [goog.string.format]
             [clojure.data]
             [atomist.cljs-log :as log]
-            [atomist.github]))
+            [atomist.github]
+            [atomist.container :as container]))
 
-(defn custom-middleware [handler]
+(defn create-ref-from-event
+  [handler]
+  (fn [request]
+    (go
+     (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
+       (<! (handler (assoc request :ref {:repo (:git.repo/name repo)
+                                         :owner (-> repo :git.repo/org :git.org/name)
+                                         :sha sha}
+                                   :token (-> repo :git.repo/org :github.org/installation-token))))))))
+
+(defn run-scan [handler]
   (fn [request]
     (go
       (log/info "do something useful here")
       (<! (handler request)))))
 
 (defn ^:export handler
-  [data sendreponse]
-  (api/make-request
-   data
-   sendreponse
-   (-> (api/finished :message "----> event handler finished")
-       (custom-middleware)
+  [& args]
+  ((-> (api/finished :message "----> event handler finished")
+       (run-scan)
+       (api/clone-ref)
+       (api/with-github-check-run :name "owasp-dependency-check")
+       (create-ref-from-event)
        (api/log-event)
-       (api/status))))
+       (api/status)
+       (container/mw-make-container-request)) {}))

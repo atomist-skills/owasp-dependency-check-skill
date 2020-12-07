@@ -1,0 +1,16 @@
+[:find
+ (pull ?commit [:git.commit/sha
+                {:git.commit/repo [:git.repo/source-id
+                                   :git.repo/name
+                                   :git.provider/url
+                                   {:git.repo/org [:github.org/installation-token
+                                                   :git.org/name
+                                                   :git.provider/url]}]}])
+ :in $ $before-db %
+ :where
+ (get-config-value "path-exists" ["project.clj"] ?path-exists)
+ (get-config-value "path-not-exists" [] ?path-not-exists)
+ (get-config-value "branch-filters" [] ?branch-filters)
+ (tx-push-with-content ?branch-filters ?default-only ?path-exists ?path-not-exists ?commit)
+ [?commit :git.commit/repo ?repo]
+ (repo-language ?repo "Clojure")]
