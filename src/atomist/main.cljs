@@ -213,21 +213,21 @@
                                                                 (map :schema/entity)
                                                                 (into []))}}]))))
 (io/spit "transaction.edn"
-      (with-out-str
-        (pprint (report->vulns
-                 {:git.provider/url "url"}
-                 {:git.repo/source-id "source-id"}
-                 {:git.commit/sha "sha"}
-                 (json/->obj (io/slurp "dependency-check-report.json"))))))
+         (with-out-str
+           (pprint (report->vulns
+                    {:git.provider/url "url"}
+                    {:git.repo/source-id "source-id"}
+                    {:git.commit/sha "sha"}
+                    (json/->obj (io/slurp "dependency-check-report.json"))))))
 
 (pprint
-(-> (io/slurp "dependency-check-report.json")
-    (json/->obj)
-    :dependencies
-    (as-> deps (->> deps
-                    (filter :vulnerabilities)
-                    (mapcat :vulnerabilities)
-                    (map #(select-keys % [:source ])))))) 
+ (-> (io/slurp "dependency-check-report.json")
+     (json/->obj)
+     :dependencies
+     (as-> deps (->> deps
+                     (filter :vulnerabilities)
+                     (mapcat :vulnerabilities)
+                     (map #(select-keys % [:source]))))))
 
 (defn run-scan [handler]
   (fn [request]
@@ -239,7 +239,7 @@
              org (:git.repo/org repo)]
          (.mkdirs scan-dir)
          (<? (lein/get-jars (io/file (-> request :project :path)) scan-dir))
-         (<? (proc/aexec (->> ["dependency-check" 
+         (<? (proc/aexec (->> ["dependency-check"
                                (gstring/format "--project %s" (:git.repo/name repo))
                                (gstring/format "--scan %s" (.getPath scan-dir))
                                "--format JSON"

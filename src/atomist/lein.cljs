@@ -12,8 +12,8 @@
    (when (.exists project-dir)
      (.mkdirs target-dir)
      (let [[stderr stdout err] (<? (proc/aexec "lein cp" {:cwd (.getPath project-dir)}))]
-        (doseq [path (s/split stdout #":")]
-          (<? (proc/aexec (gstring/format "cp %s %s" path (.getPath target-dir)))))))))
+       (doseq [path (s/split stdout #":")]
+         (<? (proc/aexec (gstring/format "cp %s %s" path (.getPath target-dir)))))))))
 
 (go
-  (<! (get-jars (io/file "/Users/slim/atmhq/bot-service") (io/file "jar-lib"))) )
+  (<! (get-jars (io/file "/Users/slim/atmhq/bot-service") (io/file "jar-lib"))))
