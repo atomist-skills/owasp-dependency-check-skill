@@ -12,8 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-{
- :namespace "atomist"
+{:namespace "atomist"
  :homepageUrl "https://github.com/atomist-skills/owasp-dependency-check-skill"
  :name "owasp-dependency-check-skill"
  :displayName "owasp dependency check skill"
@@ -21,12 +20,6 @@
  :author "slimslenderslacks"
  :license "unknown"
  :iconUrl "https://images.atomist.com/rug/atomist.png"
- :resourceProviders
- [{:name "github",
-   :description "GitHub",
-   :typeName "GitHubAppResourceProvider",
-   :minRequired 1,
-   :maxAllowed 1}]
  :parameters
  [{:stringArray
    {:name "path-not-exists"
@@ -45,5 +38,4 @@
                :image "gcr.io/atomist-container-skills/owasp-dependency-check-skill"
                :resources
                {:request {:cpu 0.1, :memory 1000},
-                :limit {:cpu 1, :memory 1000}}}}]
- }
+                :limit {:cpu 1, :memory 1000}}}}]}

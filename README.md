@@ -7,6 +7,7 @@
 ## Links
 
 -   [base docker image](https://hub.docker.com/r/owasp/dependency-check)
+-   [init.sql for postgres](https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_postgres.sql)
 
 ---
 

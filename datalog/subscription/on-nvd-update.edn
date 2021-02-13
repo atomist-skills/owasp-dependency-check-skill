@@ -1,0 +1,5 @@
+[:find ?schedule-parameter-name
+ :in $ $before-db %
+ :where
+ (tx-schedule ?schedule-parameter-name ?schedule-timezone)
+ ]
