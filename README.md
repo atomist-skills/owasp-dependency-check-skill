@@ -6,8 +6,9 @@
 
 ## Docker
 
-* added `JDBC_DRIVER_PATH` and `DEPENDENCY_CHECK` (location of dependency-check.sh script in image) environment variables
-to be used by the skill runtime.
+-   added `JDBC_DRIVER_PATH` and `DEPENDENCY_CHECK` (location of
+    dependency-check.sh script in image) environment variables to be used by the
+    skill runtime.
 
 ```
 # Docker Build
@@ -29,8 +30,10 @@ mysql --user=root --password --host=35.237.63.102 --ssl-ca=server-ca.pem --ssl-c
 
 Dependency Check will need a read-only connection to the DB (user `dcuser`).
 
-* should we import server-ca.pem into the default cacerts truststore in the image jdk?
-* import the client-key and client-cert into a keystore and make sure that the JAVA_OPTS sees this keystore
+-   should we import server-ca.pem into the default cacerts truststore in the
+    image jdk?
+-   import the client-key and client-cert into a keystore and make sure that the
+    JAVA_OPTS sees this keystore
 
 ```
 keytool -importcert -alias MySQLCACert -file server-ca.pem -keystore truststore -storepass xxxx
@@ -41,11 +44,12 @@ keytool -importkeystore -srckeystore client-keystore.p12 -srcstoretype pkcs12 -s
 
 ## Links
 
-- [initialize mysql instance with this init.sql][init.sql]
-- [base docker image][base-docker-image]
+-   [initialize mysql instance with this init.sql][init.sql]
+-   [base docker image][base-docker-image]
 
 [base-docker-image]: https://hub.docker.com/r/owasp/dependency-check
-[init.sql]: https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
+[init.sql]:
+    https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
 
 ---
 
