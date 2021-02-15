@@ -4,10 +4,48 @@
 
 <!---atomist-skill-readme:end--->
 
+## Docker
+
+* added `JDBC_DRIVER_PATH` and `DEPENDENCY_CHECK` (location of dependency-check.sh script in image) environment variables
+to be used by the skill runtime.
+
+```
+# Docker Build
+docker build -t owasp-dependency-check-skill:latest -f docker/Dockerfile .
+# Shell-In to Container
+docker run -it --entrypoint /bin/sh --user root owasp-dependency-check-skill:latest
+```
+
+## Google Mysql Instance for fast CVE lookups
+
+Can connect with mysql client using cli:
+
+```
+cd mysql
+mysql --user=root --password --host=35.237.63.102 --ssl-ca=server-ca.pem --ssl-cert=client-cert.pem --ssl-key=client-key.pem
+```
+
+### Prepare the SSL client connection
+
+Dependency Check will need a read-only connection to the DB (user `dcuser`).
+
+* should we import server-ca.pem into the default cacerts truststore in the image jdk?
+* import the client-key and client-cert into a keystore and make sure that the JAVA_OPTS sees this keystore
+
+```
+keytool -importcert -alias MySQLCACert -file server-ca.pem -keystore truststore -storepass xxxx
+
+openssl pkcs12 -export -in client-cert.pem -inkey client-key.pem -name "mysqlclient" -passout pass:xxxx -out client-keystore.p12
+keytool -importkeystore -srckeystore client-keystore.p12 -srcstoretype pkcs12 -srcstorepass dcuser -destkeystore keystore -deststoretype JKS -dest-storepass dcuser
+```
+
 ## Links
 
--   [base docker image](https://hub.docker.com/r/owasp/dependency-check)
--   [init.sql for postgres](https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_postgres.sql)
+- [initialize mysql instance with this init.sql][init.sql]
+- [base docker image][base-docker-image]
+
+[base-docker-image]: https://hub.docker.com/r/owasp/dependency-check
+[init.sql]: https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
 
 ---
 

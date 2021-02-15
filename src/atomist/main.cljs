@@ -212,22 +212,23 @@
                                                                 (filter #(= :package/dependency (:schema/entity-type %)))
                                                                 (map :schema/entity)
                                                                 (into []))}}]))))
-(io/spit "transaction.edn"
-         (with-out-str
-           (pprint (report->vulns
-                    {:git.provider/url "url"}
-                    {:git.repo/source-id "source-id"}
-                    {:git.commit/sha "sha"}
-                    (json/->obj (io/slurp "dependency-check-report.json"))))))
 
-(pprint
- (-> (io/slurp "dependency-check-report.json")
-     (json/->obj)
-     :dependencies
-     (as-> deps (->> deps
-                     (filter :vulnerabilities)
-                     (mapcat :vulnerabilities)
-                     (map #(select-keys % [:source]))))))
+(comment
+  (io/spit "transaction.edn"
+           (with-out-str
+             (pprint (report->vulns
+                      {:git.provider/url "url"}
+                      {:git.repo/source-id "source-id"}
+                      {:git.commit/sha "sha"}
+                      (json/->obj (io/slurp "dependency-check-report.json"))))))
+  (pprint
+   (-> (io/slurp "dependency-check-report.json")
+       (json/->obj)
+       :dependencies
+       (as-> deps (->> deps
+                       (filter :vulnerabilities)
+                       (mapcat :vulnerabilities)
+                       (map #(select-keys % [:source])))))))
 
 (defn run-scan [handler]
   (fn [request]
@@ -239,16 +240,17 @@
              org (:git.repo/org repo)]
          (.mkdirs scan-dir)
          (<? (lein/get-jars (io/file (-> request :project :path)) scan-dir))
-         (<? (proc/aexec (->> ["dependency-check"
-                               (gstring/format "--project %s" (:git.repo/name repo))
-                               (gstring/format "--scan %s" (.getPath scan-dir))
-                               "--format JSON"
+         (<? (proc/aexec (->> [(.. js/process -env -DEPENDENCY_CHECK)
+                               (gstring/format "--project=%s" (:git.repo/name repo))
+                               (gstring/format "--scan=%s" (.getPath scan-dir))
+                               "--format=JSON"
                                "--noupdate"
-                               (gstring/format "--connectionString %s" "")
-                               (gstring/format "--dbDriveName %s" "")
-                               (gstring/format "--dbDriverPath %s" "")
-                               (gstring/format "--dbPassword %s" "")
-                               (gstring/format "--dbUser %s" "")]
+                               (gstring/format "--connectionString=%s" 
+                                               "jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true")
+                               (gstring/format "--dbDriverName=%s" "com.mysql.cj.jdbc.Driver")
+                               (gstring/format "--dbDriverPath=%s" (.. js/process -env -JDBC_DRIVER_PATH))
+                               (gstring/format "--dbPassword=%s" (:db-password request))
+                               (gstring/format "--dbUser=%s" "root")]
                               (interpose " ")
                               (apply str))))
          (<? (api/transact request (-> (io/slurp "dependency-check-report.json")
@@ -265,13 +267,14 @@
   (fn [request]
     (go-safe
      (try
-       (<? (proc/aexec (->> ["dependency-check"
+       (<? (proc/aexec (->> [(.. js/process -env -DEPENDENCY_CHECK)
                              "--updateonly"
-                             (gstring/format "--connectionString %s" "")
-                             (gstring/format "--dbDriveName %s" "")
-                             (gstring/format "--dbDriverPath %s" "")
-                             (gstring/format "--dbPassword %s" "")
-                             (gstring/format "--dbUser %s" "")]
+                             (gstring/format "--connectionString=%s" 
+                                             "jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true")
+                             (gstring/format "--dbDriverName=%s" "com.mysql.cj.jdbc.Driver")
+                             (gstring/format "--dbDriverPath=%s" (.. js/process -env -JDBC_DRIVER_PATH))
+                             (gstring/format "--dbPassword=%s" (:db-password request))
+                             (gstring/format "--dbUser=%s" "root")]
                             (interpose " ")
                             (apply str))))
 

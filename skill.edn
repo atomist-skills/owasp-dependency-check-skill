@@ -32,7 +32,12 @@
     :displayName "Do not deploy from any repos that contain files from this set of glob expressions"
     :description "Existence of these files means that this tag should be skipped"
     :placeHolder "Dockerfile"
-    :required false}}]
+    :required false}}
+  {:secret
+   {:name "db-password"
+    :description "CVE Database Password"
+    :displayName "CVE Database Password"
+    :required true}}]
  :artifacts [{:docker
               {:name "owasp-dependency-check-skill"
                :image "gcr.io/atomist-container-skills/owasp-dependency-check-skill"
