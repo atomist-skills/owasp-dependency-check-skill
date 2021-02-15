@@ -245,7 +245,7 @@
                                (gstring/format "--scan=%s" (.getPath scan-dir))
                                "--format=JSON"
                                "--noupdate"
-                               (gstring/format "--connectionString=%s" 
+                               (gstring/format "--connectionString=%s"
                                                "jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true")
                                (gstring/format "--dbDriverName=%s" "com.mysql.cj.jdbc.Driver")
                                (gstring/format "--dbDriverPath=%s" (.. js/process -env -JDBC_DRIVER_PATH))
@@ -269,7 +269,7 @@
      (try
        (<? (proc/aexec (->> [(.. js/process -env -DEPENDENCY_CHECK)
                              "--updateonly"
-                             (gstring/format "--connectionString=%s" 
+                             (gstring/format "--connectionString=%s"
                                              "jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true")
                              (gstring/format "--dbDriverName=%s" "com.mysql.cj.jdbc.Driver")
                              (gstring/format "--dbDriverPath=%s" (.. js/process -env -JDBC_DRIVER_PATH))
