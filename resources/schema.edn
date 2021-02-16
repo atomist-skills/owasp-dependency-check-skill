@@ -56,5 +56,5 @@
   :git.commit/dependencies {:db/valueType :db.type/ref
                             :db/cardinality :db.cardinality/many}
 
-  :git.commit/vulnerabilites {:db/valueType :db.type/ref
+  :git.commit/vulnerabilities {:db/valueType :db.type/ref
                               :db/cardinality :db.cardinality/many}}}
