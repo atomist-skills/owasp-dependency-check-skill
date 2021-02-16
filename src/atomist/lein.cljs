@@ -35,13 +35,15 @@
                                                                 (-> maven-repos first :maven.repository/username)
                                                                 "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
                                                                 (-> maven-repos first :maven.repository/secret)}}))]
+       (log/infof "lein cp:  %s" stdout)
        (when err
          (log/error stderr)
          (throw (ex-info "failed to run `lein cp`" {:stderr stderr})))
        (doseq [path (s/split stdout #":")]
          (<? (proc/aexec (gstring/format "cp %s %s" path (.getPath target-dir)))))))))
 
-(go
-  (<! (get-jars (io/file "/Users/slim/atmhq/bot-service") (io/file "jar-lib") [{:maven.repository/url "url"
-                                                                                :maven.repository/username ""
-                                                                                :maven.repository/secret ""}])))
+(comment
+  (go
+    (<! (get-jars (io/file "/Users/slim/atmhq/bot-service") (io/file "jar-lib") [{:maven.repository/url "url"
+                                                                                  :maven.repository/username ""
+                                                                                  :maven.repository/secret ""}]))))

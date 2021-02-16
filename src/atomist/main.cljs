@@ -263,9 +263,13 @@
                             (interpose " ")
                             (apply str))
                [err stdout stderr] (<? (proc/aexec cmdline))]
+           (log/info "cmdline:  " cmdline)
            (when err
-             (log/errorf "%s did not run successfully:  %s" (.. js/process -env -DEPENDENCY_CHECK) (. err -errorCode)))
-           (log/error stderr))
+             (log/errorf err "%s did not run successfully:  %s" (.. js/process -env -DEPENDENCY_CHECK) (. err -code))
+             (log/error stderr)
+             (throw (ex-info "error running dependencycheck" {:error (. err -code)
+                                                              :cmdline cmdline})))
+           (log/info stdout))
          (api/trace "transact")
          (<? (api/transact request (-> (io/slurp "dependency-check-report.json")
                                        (json/->obj)
