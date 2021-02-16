@@ -45,9 +45,10 @@
     :description "CVE Database Password"
     :displayName "CVE Database Password"
     :required true}}]
- :artifacts [{:docker
-              {:name "owasp-dependency-check-skill"
-               :image "gcr.io/atomist-container-skills/owasp-dependency-check-skill"
-               :resources
-               {:request {:cpu 0.1, :memory 1000},
-                :limit {:cpu 1, :memory 1000}}}}]}
+ :artifacts
+ {:docker
+  [{:name "owasp-dependency-check-skill"
+    :image "gcr.io/atomist-container-skills/owasp-dependency-check-skill"
+    :resources
+    {:request {:cpu 0.5, :memory 1000},
+     :limit {:cpu 1, :memory 1000}}}]}}
