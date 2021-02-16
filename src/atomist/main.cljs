@@ -268,8 +268,7 @@
                             (log/info "dependencycheck stopped with code " code)
                             (go (>! c {:code code}))))
            (when (not (= 0 (:code (<! c))))
-             (throw (ex-info "error running dependencycheck" {:error (. err -code)
-                                                              :command command
+             (throw (ex-info "error running dependencycheck" {:command command
                                                               :args args}))))
          (api/trace "transact")
          (<? (api/transact request (-> (io/slurp "dependency-check-report.json")
