@@ -13,30 +13,30 @@
 ;; limitations under the License.
 
 {:attributes
- {:package/url {:db.entity/attrs [:package.url/url]
-                :package.url/url {:db/valueType :db.type/string
-                                                   :db/cardinality :db.cardinality/one}
-                :package.url/evidence {:db/valueType :db.type/ref
-                                       :db/cardinality :db.cardinality/many }
-                :package.url/search-url {:db/valueType :db.type/string
-                                                   :db/cardinality :db.cardinality/one}}
+ {:package/url {:db.entity/attrs [:package.url/url]}
+  :package.url/url {:db/valueType :db.type/string
+                    :db/cardinality :db.cardinality/one}
+  :package.url/evidence {:db/valueType :db.type/ref
+                         :db/cardinality :db.cardinality/many}
+  :package.url/search-url {:db/valueType :db.type/string
+                           :db/cardinality :db.cardinality/one}
 
-  :package/evidence {:db.entity/attrs [:schema/random-guid]
-                     :package.evidence/dependency {:db/valueType :db.type/ref
-                                                   :db/cardinality :db.cardinality/one }
-                     :package.evidence/source {:db/valueType :db.type/ref
-                                               :db/cardinality :db.cardinality/one}
-                     :package.evidence/confidence {:db/valueType :db.type/string
-                                                   :db/cardinality :db.cardinality/one}}
+  :package/evidence {:db.entity/attrs [:schema/random-guid]}
+  :package.evidence/dependency {:db/valueType :db.type/ref
+                                :db/cardinality :db.cardinality/one}
+  :package.evidence/source {:db/valueType :db.type/ref
+                            :db/cardinality :db.cardinality/one}
+  :package.evidence/confidence {:db/valueType :db.type/string
+                                :db/cardinality :db.cardinality/one}
   :package.evidence.source/DEPENDENCY_CHECK {}
 
-  :package/dependency {:db.entity/attrs [:package.dependency/sha256]
-                       :package.dependency/sha256 {:db/valueType :db.type/string
-                                                   :db/cardinality :db.cardinality/one}
-                       :package.dependency/fileName {:db/valueType :db.type/string
-                                                     :db/cardinality :db.cardinality/one}
-                       :package.dependency/license {:db/valueType :db.type/string
-                                                    :db/cardinality :db.cardinality/one}}
+  :package/dependency {:db.entity/attrs [:package.dependency/sha256]}
+  :package.dependency/sha256 {:db/valueType :db.type/string
+                              :db/cardinality :db.cardinality/one}
+  :package.dependency/fileName {:db/valueType :db.type/string
+                                :db/cardinality :db.cardinality/one}
+  :package.dependency/license {:db/valueType :db.type/string
+                               :db/cardinality :db.cardinality/one}
 
   ;; -------------
 
