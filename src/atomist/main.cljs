@@ -150,11 +150,12 @@
                               (->> (seq vulnerabilityIds)
                                    (map-indexed (fn [index {:keys [id confidence url]}]
                                                   (let [cpe-evidence (gstring/format "cpe-evidence-%s-%d" fileName index)]
-                                                    [{:schema/entity-type :vulnerability/cpe
-                                                      :schema/entity (gstring/format "vuln-%s-%d" fileName index)
-                                                      :vulnerability.cpe/evidence {:add [cpe-evidence]}
-                                                      :vulnerability.cpe/url id
-                                                      :vulnerability.cpe/search-url url}
+                                                    [(merge
+                                                      {:schema/entity-type :vulnerability/cpe
+                                                       :schema/entity (gstring/format "vuln-%s-%d" fileName index)
+                                                       :vulnerability.cpe/evidence {:add [cpe-evidence]}
+                                                       :vulnerability.cpe/url id}
+                                                      (when url {:vulnerability.cpe/search-url url}))
                                                      {:schema/entity-type :package/evidence
                                                       :schema/entity cpe-evidence
                                                       :package.evidence/dependency fileName
@@ -230,6 +231,25 @@
                        (mapcat :vulnerabilities)
                        (map #(select-keys % [:source])))))))
 
+(defn spawn [command args]
+  (go-safe
+   (log/info "args " args)
+   (let [c (async/chan)
+         p (proc/spawn command args {})]
+     (.on (.-stderr p) "data" (fn [d] (log/error d)))
+     (.on (.-stdout p) "data" (fn [d] (log/info d)))
+     (.on p "close" (fn [code]
+                      (log/infof "%s stopped with code %s" code)
+                      (go
+                        (if (= 0 code)
+                          (>! c code)
+                          (>! c (ex-info
+                                 (gstring/format "%s failed (%s)" command code)
+                                 {:code code
+                                  :command command
+                                  :args args}))))))
+     (<! c))))
+
 (defn run-scan [handler]
   (fn [request]
     (go-safe
@@ -258,18 +278,8 @@
                      "--dbDriverName" "com.mysql.cj.jdbc.Driver"
                      "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH)
                      "--dbPassword" (:db-password request)
-                     "--dbUser" "root"]
-               c (async/chan)
-               p (proc/spawn command args {})]
-           (log/info "args " args)
-           (.on (.-stderr p) "data" (fn [d] (log/error d)))
-           (.on (.-stdout p) "data" (fn [d] (log/info d)))
-           (.on p "close" (fn [code]
-                            (log/info "dependencycheck stopped with code " code)
-                            (go (>! c {:code code}))))
-           (when (not (= 0 (:code (<! c))))
-             (throw (ex-info "error running dependencycheck" {:command command
-                                                              :args args}))))
+                     "--dbUser" "root"]]
+           (<? (spawn command args)))
          (api/trace "transact")
          (<? (api/transact request (-> (io/slurp "dependency-check-report.json")
                                        (json/->obj)
@@ -286,16 +296,14 @@
   (fn [request]
     (go-safe
      (try
-       (<? (proc/aexec (->> [(.. js/process -env -DEPENDENCY_CHECK)
-                             "--updateonly"
-                             (gstring/format "--connectionString %s"
-                                             "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"")
-                             (gstring/format "--dbDriverName %s" "com.mysql.cj.jdbc.Driver")
-                             (gstring/format "--dbDriverPath %s" (.. js/process -env -JDBC_DRIVER_PATH))
-                             (gstring/format "--dbPassword %s" (:db-password request))
-                             (gstring/format "--dbUser %s" "root")]
-                            (interpose " ")
-                            (apply str))))
+       (let [command (.. js/process -env -DEPENDENCY_CHECK)
+             args ["--updateonly"
+                   "--connectionString" "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"" 
+                   "--dbDriverName" "com.mysql.cj.jdbc.Driver" 
+                   "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH) 
+                   "--dbPassword" (:db-password request) 
+                   "--dbUser" "root"]]
+         (<? (spawn command args)))
 
        (<? (handler (assoc request :atomist/status {:code 0
                                                     :reason "update NVD database"})))
