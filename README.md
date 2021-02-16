@@ -22,12 +22,33 @@ Can connect with mysql client using cli:
 
 ```
 cd mysql
+mysql --user=root --password --host=35.237.63.102
+```
+
+After the initial load to a local mysql (not the above one), using dependencycheck:
+
+```
+./mysql/update-mysql.sh
+```
+
+I then took a sqldump of the local database and fixed it using sed (weird bug):
+
+```
+mysqldump --databases dependencycheck -h localhost -u root -p --hex-blob --single-transaction --set-gtid-purged=OFF --default-character-set=utf8mb4 > dump.sql
+sed -i '' 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/g' 2019-10-26-prod.sql
+```
+
+I then uploaded it to a bucket in my project and imported it to my Google Cloud SQL instance using the console.
+
+## TODO:  Prepare the SSL client connection
+
+Switch to using SSL only connections to the DB:
+
+```
 mysql --user=root --password --host=35.237.63.102 --ssl-ca=server-ca.pem --ssl-cert=client-cert.pem --ssl-key=client-key.pem
 ```
 
-### Prepare the SSL client connection
-
-Dependency Check will need a read-only connection to the DB (user `dcuser`).
+Dependency Check will need to run with a JVM that has new keystores and an additional CA in its default truststore.
 
 * should we import server-ca.pem into the default cacerts truststore in the image jdk?
 * import the client-key and client-cert into a keystore and make sure that the JAVA_OPTS sees this keystore
@@ -38,15 +59,6 @@ keytool -importcert -alias MySQLCACert -file server-ca.pem -keystore truststore 
 openssl pkcs12 -export -in client-cert.pem -inkey client-key.pem -name "mysqlclient" -passout pass:xxxx -out client-keystore.p12
 keytool -importkeystore -srckeystore client-keystore.p12 -srcstoretype pkcs12 -srcstorepass dcuser -destkeystore keystore -deststoretype JKS -dest-storepass dcuser
 ```
-
-After the initial load to a local mysql, dump the database:
-
-```
-mysqldump --databases dependencycheck -h localhost -u root -p --hex-blob --single-transaction --set-gtid-purged=OFF --default-character-set=utf8mb4 > dump.sql
-sed -i '' 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/g' 2019-10-26-prod.sql
-```
-
-I then uploaded it to a bucket and imported it in the console.
 
 ## Links
 
