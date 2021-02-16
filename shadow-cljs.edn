@@ -19,7 +19,7 @@
    :exports {:handler atomist.main/handler},
    :output-to "index.js"},
   :release
-  {:target :node-library,
+  {:target :node-script,
    :output-to "index.js",
    :exports {:handler atomist.main/handler},
    :compiler-options {:optimizations :simple}
