@@ -261,12 +261,12 @@
                      "--dbUser" "root"]
                c (async/chan)
                p (proc/spawn command args {})]
+           (log/info "args " args)
            (.on (.-stderr p) "data" (fn [d] (log/error d)))
            (.on (.-stdout p) "data" (fn [d] (log/info d)))
            (.on p "close" (fn [code]
                             (log/info "dependencycheck stopped with code " code)
                             (go (>! c {:code code}))))
-           (<! c)
            (when (not (= 0 (:code (<! c))))
              (throw (ex-info "error running dependencycheck" {:error (. err -code)
                                                               :command command
