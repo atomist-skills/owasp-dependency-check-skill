@@ -298,10 +298,10 @@
      (try
        (let [command (.. js/process -env -DEPENDENCY_CHECK)
              args ["--updateonly"
-                   "--connectionString" "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"" 
-                   "--dbDriverName" "com.mysql.cj.jdbc.Driver" 
-                   "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH) 
-                   "--dbPassword" (:db-password request) 
+                   "--connectionString" "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\""
+                   "--dbDriverName" "com.mysql.cj.jdbc.Driver"
+                   "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH)
+                   "--dbPassword" (:db-password request)
                    "--dbUser" "root"]]
          (<? (spawn command args)))
 
