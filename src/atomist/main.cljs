@@ -239,7 +239,7 @@
      (.on (.-stderr p) "data" (fn [d] (log/error d)))
      (.on (.-stdout p) "data" (fn [d] (log/info d)))
      (.on p "close" (fn [code]
-                      (log/infof "%s stopped with code %s" code)
+                      (log/infof "%s stopped with code %s" command code)
                       (go
                         (if (= 0 code)
                           (>! c code)
