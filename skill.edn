@@ -28,22 +28,33 @@
                             :description "One or more repositories required for artifact resolution"
                             :scopes ["configuration"]}]}
  :parameters
- [{:stringArray
+ [{:fileFilter
    {:name "path-not-exists"
-    :displayName "Do not deploy from any repos that contain files from this set of glob expressions"
+    :displayName "Do not deploy from any repos that contain files from this list of paths"
     :description "Existence of these files means that this tag should be skipped"
     :placeHolder "Dockerfile"
     :required false}}
+  {:fileFilter
+   {:name "other-files-to-index"
+    :description "Paths to index"
+    :visibility "hidden"
+    :defaultValue ["project.clj"]
+    :required false}}
   {:stringArray
    {:name "branch-filters"
-    :displayName "Do not deploy from any repos that contain files from this set of glob expressions"
-    :description "Existence of these files means that this tag should be skipped"
+    :displayName "filter branches"
+    :description "filter branches that should have owasp dependency analysis"
     :placeHolder "Dockerfile"
     :required false}}
   {:secret
    {:name "db-password"
     :description "CVE Database Password"
     :displayName "CVE Database Password"
+    :required true}}
+  {:repoFilter
+   {:description "The set of repositories to monitor for tags",
+    :displayName "Repository Scope",
+    :name "scope",
     :required true}}]
  :artifacts
  {:docker
