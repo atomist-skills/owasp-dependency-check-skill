@@ -250,16 +250,15 @@
          (.mkdirs scan-dir)
          (<? (lein/get-jars (io/file (-> request :project :path)) scan-dir (:resolve repo-map)))
          (let [command (.. js/process -env -DEPENDENCY_CHECK)
-               args [(gstring/format "--project %s" (:git.repo/name repo))
-                     (gstring/format "--scan %s" (.getPath scan-dir))
-                     "--format JSON"
+               args ["--project" (:git.repo/name repo)
+                     "--scan" (.getPath scan-dir)
+                     "--format" "JSON"
                      "--noupdate"
-                     (gstring/format "--connectionString %s"
-                                     "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"")
-                     (gstring/format "--dbDriverName %s" "com.mysql.cj.jdbc.Driver")
-                     (gstring/format "--dbDriverPath %s" (.. js/process -env -JDBC_DRIVER_PATH))
-                     (gstring/format "--dbPassword %s" (:db-password request))
-                     (gstring/format "--dbUser %s" "root")]
+                     "--connectionString" "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\""
+                     "--dbDriverName" "com.mysql.cj.jdbc.Driver"
+                     "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH)
+                     "--dbPassword" (:db-password request)
+                     "--dbUser" "root"]
                c (async/chan)
                p (proc/spawn command args {})]
            (.on (.-stderr p) "data" (fn [d] (log/error d)))
