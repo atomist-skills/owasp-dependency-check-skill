@@ -6,6 +6,11 @@
                                    {:git.repo/org [:github.org/installation-token
                                                    :git.org/name
                                                    :git.provider/url]}]}])
+ (pull ?maven-repo [:maven.repository/url
+                    :maven.repository/secret
+                    :maven.repository/username
+                    :maven.repository/repository-id])
+ ?usage
  :in $ $before-db %
  :where
  (get-config-value "path-exists" ["project.clj"] ?path-exists)
@@ -13,4 +18,5 @@
  (get-config-value "branch-filters" [] ?branch-filters)
  (tx-push-with-content ?branch-filters ?default-only ?path-exists ?path-not-exists ?commit)
  [?commit :git.commit/repo ?repo]
- (repo-language ?repo "Clojure")]
+ (repo-language ?repo "Clojure")
+ (capability-configuration "atomist" "MavenRepository" ?usage ?maven-repo)]

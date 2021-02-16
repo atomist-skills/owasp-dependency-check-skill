@@ -20,6 +20,13 @@
  :author "slimslenderslacks"
  :license "unknown"
  :iconUrl "https://images.atomist.com/rug/atomist.png"
+ :capabilities {:requires [{:namespace "atomist"
+                            :name "MavenRepository"
+                            :minRequired 0
+                            :usage "resolve"
+                            :displayName "Artifact Resolution Repository"
+                            :description "One or more repositories required for artifact resolution"
+                            :scopes ["configuration"]}]}
  :parameters
  [{:stringArray
    {:name "path-not-exists"

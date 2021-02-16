@@ -233,32 +233,47 @@
 (defn run-scan [handler]
   (fn [request]
     (go-safe
+     (api/trace "run-scan")
      (try
-       (let [scan-dir (io/file "scan-dir")
+       (let [repo-map (reduce
+                       (fn [acc [_ repo usage]]
+                         (if (and repo usage)
+                           (update acc (keyword usage) (fn [repos]
+                                                         (conj (or repos []) repo)))
+                           acc))
+                       {}
+                       (-> request :subscription :result))
+             scan-dir (io/file "scan-dir")
              commit (-> request :subscription :result first first)
              repo (:git.commit/repo commit)
              org (:git.repo/org repo)]
          (.mkdirs scan-dir)
-         (<? (lein/get-jars (io/file (-> request :project :path)) scan-dir))
-         (<? (proc/aexec (->> [(.. js/process -env -DEPENDENCY_CHECK)
-                               (gstring/format "--project=%s" (:git.repo/name repo))
-                               (gstring/format "--scan=%s" (.getPath scan-dir))
-                               "--format=JSON"
-                               "--noupdate"
-                               (gstring/format "--connectionString=%s"
-                                               "jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true")
-                               (gstring/format "--dbDriverName=%s" "com.mysql.cj.jdbc.Driver")
-                               (gstring/format "--dbDriverPath=%s" (.. js/process -env -JDBC_DRIVER_PATH))
-                               (gstring/format "--dbPassword=%s" (:db-password request))
-                               (gstring/format "--dbUser=%s" "root")]
-                              (interpose " ")
-                              (apply str))))
+         (<? (lein/get-jars (io/file (-> request :project :path)) scan-dir (:resolve repo-map)))
+         (let [cmdline (->> [(.. js/process -env -DEPENDENCY_CHECK)
+                             (gstring/format "--project %s" (:git.repo/name repo))
+                             (gstring/format "--scan %s" (.getPath scan-dir))
+                             "--format JSON"
+                             "--noupdate"
+                             (gstring/format "--connectionString %s"
+                                             "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"")
+                             (gstring/format "--dbDriverName %s" "com.mysql.cj.jdbc.Driver")
+                             (gstring/format "--dbDriverPath %s" (.. js/process -env -JDBC_DRIVER_PATH))
+                             (gstring/format "--dbPassword %s" (:db-password request))
+                             (gstring/format "--dbUser %s" "root")]
+                            (interpose " ")
+                            (apply str))
+               [err stdout stderr] (<? (proc/aexec cmdline))]
+           (when err
+             (log/errorf "%s did not run successfully:  %s" (.. js/process -env -DEPENDENCY_CHECK) (. err -errorCode)))
+           (log/error stderr))
+         (api/trace "transact")
          (<? (api/transact request (-> (io/slurp "dependency-check-report.json")
                                        (json/->obj)
                                        (as-> json (report->vulns org repo commit json)))))
          (<? (handler (assoc request :atomist/status {:code 0
                                                       :reason "scan complete"}))))
        (catch :default ex
+         (log/errorf ex "Error %s\n%s" (.-message ex) (ex-data ex))
          (assoc request
                 :atomist/status {:code 1
                                  :reason (gstring/format "Scan failed:  %s" (.-message ex))}))))))
@@ -269,12 +284,12 @@
      (try
        (<? (proc/aexec (->> [(.. js/process -env -DEPENDENCY_CHECK)
                              "--updateonly"
-                             (gstring/format "--connectionString=%s"
-                                             "jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true")
-                             (gstring/format "--dbDriverName=%s" "com.mysql.cj.jdbc.Driver")
-                             (gstring/format "--dbDriverPath=%s" (.. js/process -env -JDBC_DRIVER_PATH))
-                             (gstring/format "--dbPassword=%s" (:db-password request))
-                             (gstring/format "--dbUser=%s" "root")]
+                             (gstring/format "--connectionString %s"
+                                             "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"")
+                             (gstring/format "--dbDriverName %s" "com.mysql.cj.jdbc.Driver")
+                             (gstring/format "--dbDriverPath %s" (.. js/process -env -JDBC_DRIVER_PATH))
+                             (gstring/format "--dbPassword %s" (:db-password request))
+                             (gstring/format "--dbUser %s" "root")]
                             (interpose " ")
                             (apply str))))
 
@@ -293,8 +308,9 @@
                          :default (-> (api/finished)
                                       (run-scan)
                                       (api/clone-ref)
-                                      (api/with-github-check-run :name "owasp-dependency-check")
+                                      #_(api/with-github-check-run :name "owasp-dependency-check")
                                       (create-ref-from-event))})
+       (api/add-skill-config)
        (api/log-event)
        (api/status)
        (container/mw-make-container-request)) {}))

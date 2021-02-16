@@ -39,6 +39,15 @@ openssl pkcs12 -export -in client-cert.pem -inkey client-key.pem -name "mysqlcli
 keytool -importkeystore -srckeystore client-keystore.p12 -srcstoretype pkcs12 -srcstorepass dcuser -destkeystore keystore -deststoretype JKS -dest-storepass dcuser
 ```
 
+After the initial load to a local mysql, dump the database:
+
+```
+mysqldump --databases dependencycheck -h localhost -u root -p --hex-blob --single-transaction --set-gtid-purged=OFF --default-character-set=utf8mb4 > dump.sql
+sed -i '' 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/g' 2019-10-26-prod.sql
+```
+
+I then uploaded it to a bucket and imported it in the console.
+
 ## Links
 
 - [initialize mysql instance with this init.sql][init.sql]
