@@ -14,6 +14,6 @@
 
 apiVersion: 1
 package:
-  type: atomist/node-skill
+  type: atomist/container-skill
   command: npm ci && npm run skill
-  tag: false
+  tag: default-branch-only
