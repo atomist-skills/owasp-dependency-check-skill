@@ -16,7 +16,7 @@
   (:require [atomist.api :as api]
             [atomist.lein :as lein]
             [cljs.pprint :refer [pprint]]
-            [cljs.core.async :refer [<!] :refer-macros [go]]
+            [cljs.core.async :refer [<! >!] :refer-macros [go] :as async]
             [atomist.async :refer-macros [go-safe <?]]
             [goog.string.format]
             [goog.string :as gstring]
@@ -249,27 +249,29 @@
              org (:git.repo/org repo)]
          (.mkdirs scan-dir)
          (<? (lein/get-jars (io/file (-> request :project :path)) scan-dir (:resolve repo-map)))
-         (let [cmdline (->> [(.. js/process -env -DEPENDENCY_CHECK)
-                             (gstring/format "--project %s" (:git.repo/name repo))
-                             (gstring/format "--scan %s" (.getPath scan-dir))
-                             "--format JSON"
-                             "--noupdate"
-                             (gstring/format "--connectionString %s"
-                                             "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"")
-                             (gstring/format "--dbDriverName %s" "com.mysql.cj.jdbc.Driver")
-                             (gstring/format "--dbDriverPath %s" (.. js/process -env -JDBC_DRIVER_PATH))
-                             (gstring/format "--dbPassword %s" (:db-password request))
-                             (gstring/format "--dbUser %s" "root")]
-                            (interpose " ")
-                            (apply str))
-               [err stdout stderr] (<? (proc/aexec cmdline))]
-           (log/info "cmdline:  " cmdline)
-           (when err
-             (log/errorf err "%s did not run successfully:  %s" (.. js/process -env -DEPENDENCY_CHECK) (. err -code))
-             (log/error stderr)
+         (let [command (.. js/process -env -DEPENDENCY_CHECK)
+               args [(gstring/format "--project %s" (:git.repo/name repo))
+                     (gstring/format "--scan %s" (.getPath scan-dir))
+                     "--format JSON"
+                     "--noupdate"
+                     (gstring/format "--connectionString %s"
+                                     "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\"")
+                     (gstring/format "--dbDriverName %s" "com.mysql.cj.jdbc.Driver")
+                     (gstring/format "--dbDriverPath %s" (.. js/process -env -JDBC_DRIVER_PATH))
+                     (gstring/format "--dbPassword %s" (:db-password request))
+                     (gstring/format "--dbUser %s" "root")]
+               c (async/chan)
+               p (proc/spawn command args {})]
+           (.on (.-stderr p) "data" (fn [d] (log/error d)))
+           (.on (.-stdout p) "data" (fn [d] (log/info d)))
+           (.on p "close" (fn [code]
+                            (log/info "dependencycheck stopped with code " code)
+                            (go (>! c {:code code}))))
+           (<! c)
+           (when (not (= 0 (:code (<! c))))
              (throw (ex-info "error running dependencycheck" {:error (. err -code)
-                                                              :cmdline cmdline})))
-           (log/info stdout))
+                                                              :command command
+                                                              :args args}))))
          (api/trace "transact")
          (<? (api/transact request (-> (io/slurp "dependency-check-report.json")
                                        (json/->obj)
