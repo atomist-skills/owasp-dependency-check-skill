@@ -38,6 +38,15 @@
   :package.dependency/license {:db/valueType :db.type/string
                                :db/cardinality :db.cardinality/one}
 
+  :dependency.analysis/discovery {:db.entity/attrs [:dependency.analysis.discovery/commit]}
+  :dependency.analysis.discovery/commit {:db/valueType :db.type/ref
+                                         :db/cardinality :db.cardinality/one}
+  :dependency.analysis.discovery/source {:db/valueType :db.type/ref
+                                         :db/cardinality :db.cardinality/one}
+  :dependency.analysis.discovery/status {:db/valueType :db.type/ref
+                                         :db/cardinality :db.cardinality/one}
+  :dependency.analysis.discovery.status/COMPLETE {}
+  :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER {}
   ;; -------------
 
   :vulnerability.cve/source {:db/valueType :db.type/ref
@@ -57,4 +66,4 @@
                             :db/cardinality :db.cardinality/many}
 
   :git.commit/vulnerabilities {:db/valueType :db.type/ref
-                              :db/cardinality :db.cardinality/many}}}
+                               :db/cardinality :db.cardinality/many}}}
