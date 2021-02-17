@@ -196,18 +196,18 @@
      (<? (api/transact request [{:dependency.analysis.discovery/commit "$commit"
                                  :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER
                                  :dependency.analysis.discovery/status :dependency.analysis.discovery.status/COMPLETE}]))
-     (<? (handler (assoc request 
-                         :atomist/status 
-                         {:code 0 
+     (<? (handler (assoc request
+                         :atomist/status
+                         {:code 0
                           :reason "owasp dependency scan complete and discoverable"}))))))
 
 (comment
   (go
     (<! ((transact-vulns #(go %))
-             {:atomist/org {:git.provider/url "url"}
-              :atomist/repo {:git.repo/source-id "source-id"}
-              :atomist/commit {:git.commit/sha "sha"}
-              :atomist/dependency-report (json/->obj (io/slurp "dependency-check-report.json"))})))
+         {:atomist/org {:git.provider/url "url"}
+          :atomist/repo {:git.repo/source-id "source-id"}
+          :atomist/commit {:git.commit/sha "sha"}
+          :atomist/dependency-report (json/->obj (io/slurp "dependency-check-report.json"))})))
   (pprint
    (-> (io/slurp "dependency-check-report.json")
        (json/->obj)
