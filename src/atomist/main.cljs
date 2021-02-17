@@ -193,7 +193,8 @@
            (map (partial transact-dependency request org repo commit))
            (async/merge)
            (async/reduce conj [])))
-     (<? (api/transact request [{:dependency.analysis.discovery/commit "$commit"
+     (<? (api/transact request [{:schema/entity-type :dependency.analysis/discovery
+                                 :dependency.analysis.discovery/commit "$commit"
                                  :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER
                                  :dependency.analysis.discovery/status :dependency.analysis.discovery.status/COMPLETE}]))
      (<? (handler (assoc request
