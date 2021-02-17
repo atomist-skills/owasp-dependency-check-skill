@@ -193,7 +193,16 @@
            (map (partial transact-dependency request org repo commit))
            (async/merge)
            (async/reduce conj [])))
-     (<? (api/transact request [{:schema/entity-type :dependency.analysis/discovery
+     (<? (api/transact request [{:schema/entity-type :git/repo
+                                 :schema/entity "$repo"
+                                 :git.provider/url (:git.provider/url org)
+                                 :git.repo/source-id (:git.repo/source-id repo)}
+                                {:schema/entity-type :git/commit
+                                 :schema/entity "$commit"
+                                 :git.provider/url (:git.provider/url org)
+                                 :git.commit/sha (:git.commit/sha commit)
+                                 :git.commit/repo "$repo"}
+                                {:schema/entity-type :dependency.analysis/discovery
                                  :dependency.analysis.discovery/commit "$commit"
                                  :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER
                                  :dependency.analysis.discovery/status :dependency.analysis.discovery.status/COMPLETE}]))
