@@ -67,6 +67,9 @@ keytool -importkeystore -srckeystore client-keystore.p12 -srcstoretype pkcs12 -s
 
 [base-docker-image]: https://hub.docker.com/r/owasp/dependency-check
 [init.sql]: https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
+[nvd feed]: https://csrc.nist.gov/schema/nvd/feed/1.1/nvd_cve_feed_json_1.1.schema
+[cpe 2.3 spec]: https://cpe.mitre.org/specification/
+[matching spec]: https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir7696.pdf
 
 ---
 
