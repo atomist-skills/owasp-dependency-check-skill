@@ -20,6 +20,8 @@
                          :db/cardinality :db.cardinality/many}
   :package.url/search-url {:db/valueType :db.type/string
                            :db/cardinality :db.cardinality/one}
+  :package.url/cves {:db/valueType :db.type/ref
+                     :db/cardinality :db.cardinality/many }
 
   :package/evidence {:db.entity/attrs [:schema/random-guid]}
   :package.evidence/dependency {:db/valueType :db.type/ref
@@ -60,7 +62,8 @@
                                  :db/cardinality :db.cardinality/one}
   :vulnerability.cpe/evidence {:db/valueType :db.type/ref
                                :db/cardinality :db.cardinality/many}
-
+  :vulnerability.cpe/cves {:db/valueType :db.type/ref
+                           :db/cardinality :db.cardinality/many}
   ;; adding some attributes to the Commit
   :git.commit/dependencies {:db/valueType :db.type/ref
                             :db/cardinality :db.cardinality/many}

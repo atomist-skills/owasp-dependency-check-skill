@@ -60,6 +60,16 @@ openssl pkcs12 -export -in client-cert.pem -inkey client-key.pem -name "mysqlcli
 keytool -importkeystore -srckeystore client-keystore.p12 -srcstoretype pkcs12 -srcstorepass dcuser -destkeystore keystore -deststoretype JKS -dest-storepass dcuser
 ```
 
+## Analyzers
+
+* `OssIndexAnalyzer` - add Vulnerabilities based on purls - source of CVEs is OSSINDEX
+* `CPEAnalyzer` - use evidence to search lucene index
+* `NvdCveAnalyzer` - add vulnerabilities for identified CPEs
+* `CentralAnalyzer` - locate a dependency from central and add the dep's sha info
+* `JarAnalyzer` - analyze pom files (adds purl software identifier to dependency, as well as other pom based evidence) 
+
+OSSINDEX vulnerabilities should be attached to the purl if there's just one.
+
 ## Links
 
 - [initialize mysql instance with this init.sql][init.sql]

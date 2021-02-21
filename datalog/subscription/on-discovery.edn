@@ -28,15 +28,34 @@
                  [:git.user/login
                   :git.user/name
                   {:git.user/emails [:email.email/address]}]}
-                :git.commit/sha
-                {:git.commit/vulnerabilities [:vulnerability.cve/source-id
-                                              :vulnerability.cve/cvss-score
-                                              :vulnerability.cve/description
-                                              :vulnerability.cve/source
-                                              :vulnerability.cve/severity]} ])
+                :git.commit/sha])
+ (pull ?cve [:vulnerability.cve/source
+             :vulnerability.cpe/evidence
+             :vulnerability.cve/source-id
+             :vulnerability.cve/cvss-score
+             {:vulnerability.cpe/_cves
+              [{:vulnerability.cpe/evidence
+                [{:package.evidence/dependency
+                  [:package.dependency/license
+                   :package.dependency/fileName]}
+                 :package.evidence/confidence
+                 :package.evidence/source]}]}
+             {:package.url/_cves
+              [{:package.url/evidence
+                [{:package.evidence/dependency
+                  [:package.dependency/license
+                   :package.dependency/fileName]}
+                 :package.evidence/confidence
+                 :package.evidence/source]}]}])
  :in $ $before %
  :where
  (tx-entity-attr-value :dependency.analysis.discovery/status ?discovery ?status)
  [?discovery :dependency.analysis.discovery/status :dependency.analysis.discovery.status/COMPLETE]
  [?discovery :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER]
- [?discovery :dependency.analysis.discovery/commit ?commit]]
+ [?discovery :dependency.analysis.discovery/commit ?commit]
+ [?commit :git.commit/dependencies ?deps]
+ [?deps :package.evidence/dependency ?evidence]
+ (or (and [?evidence :vulnerability.cpe/evidence ?cpe]
+          [?cpe :vulnerability.cpe/cves ?cve])
+     (and [?evidence :package.url/evidence ?purl]
+          [?purl :package.url/cves ?cve]))]

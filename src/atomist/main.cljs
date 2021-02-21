@@ -25,9 +25,11 @@
             [atomist.cljs-log :as log]
             [atomist.github]
             [atomist.container :as container]
+            [atomist.local-runner :as lr]
             [cljs-node-io.core :as io]
             [cljs-node-io.proc :as proc]
-            [atomist.json :as json]))
+            [atomist.json :as json]
+            [clojure.edn :as edn]))
 
 ;; sonatype OSS Index
 ;; https://ossindex.sonatype.org/component/pkg:npm/jquery@1.8.0.min
@@ -106,57 +108,146 @@
                                          :sha sha}
                            :token (-> repo :git.repo/org :github.org/installation-token))))))))
 
+(defn prn-matching-software [{{:keys [id versionStartIncluding versionEndIncluding versionStartExcluding versionEndExcluding]} :software}]
+  (gstring/format "%s-%s%s,%s%s" 
+                  id 
+                  (cond versionStartExcluding "(" versionStartIncluding "[" :else "(")
+                  (or versionStartIncluding versionStartExcluding "")
+                  (cond versionEndExcluding "(" versionEndIncluding "[" :else "(")
+                  (or versionEndIncluding versionEndExcluding "")))
+
+(defn cpe-match? [cpe1 cpe2 & {:keys [startInc startExc endInc EndExc]}]
+  true)
+
+(defn cve-vulnerable?
+  "check whether cpe matches the cve using it's matching software data"
+  [{:as cpe :vulnerability.cpe/keys [url]}
+   {:atomist/keys [matching-software]}]
+  (log/infof "compare cpe %s to matching softwares %s" 
+             (:vulnerability.cpe/url cpe) 
+             (->> matching-software (map prn-matching-software) (interpose ",") (apply str)))
+  (->> matching-software
+       (some #(let [{{:keys [id versionStartIncluding versionStartExcluding versionEndIncluding versionEndExcluding]} :software} %]
+                (cpe-match? url id
+                            :startInc versionStartIncluding
+                            :startExc versionStartExcluding
+                            :endInc versionEndIncluding
+                            :endExc versionEndExcluding)))))
+
+(def is-cve? #(= :vulnerability/cve (:schema/entity-type %)))
+(def is-cpe? #(= :vulnerability/cpe (:schema/entity-type %)))
+(def is-package-url? #(= :package/url (:schema/entity-type %)))
+(def known-source? #(#{:vulnerability.cve.source/NVD :vulnerability.cve.source/RETIREJS :vulnerability.cve.source/OSSINDEX} 
+                      (:vulnerability.cve/source %)))
+
+(defn link-cpes
+  "when a cve has a cpe match, link it to the correct cpe by adding a reference to the :vulnerability.cpe/cves attribute" 
+  [cpes cves]
+  (->> cpes
+       (map (fn [{:as cpe}]
+              (if (and (is-cpe? cpe))
+                (assoc cpe :vulnerability.cpe/cves
+                       {:add (->> cves
+                                  (filter is-cve?)
+                                  (filter (partial cve-vulnerable? cpe))
+                                  (map :schema/entity)
+                                  (into []))})
+
+                cpe)))
+       (into [])))
+
+(defn link-purls
+  "when a dependency has only one purl, link it to all discovered CVEs
+     or leave the purls unlinked if the number of packages on this dependency is > 1
+     only link purls if the cve source is NVD, RETIREJS, or OSSINDEX"
+  [purls cves]
+  (let [purl-count (->> purls (filter is-package-url?) (count))]
+    (if (= 1 purl-count)
+      (->> purls
+           (map #(if (is-package-url? %)
+                   (let [refs (->> cves
+                                   (filter is-cve?)
+                                   (filter known-source?)
+                                   (map :schema/entity)
+                                   (into []))]
+                     (assoc % :package.url/cves
+                            {:add refs}))
+                   %))
+           (into []))
+      (do
+        (when (and (> purl-count 1) (seq cves))
+          ;; TODO log warning
+          (log/warnf "dependency has more than one purl - ambiguous assignment of cpe->cves"))
+        purls))))
+
+;; case 1 - no packages (do nothing)
+;; case 2 - package(s) only, no CVES (transact package)
+;; case 3 - 1 package, 1 CPE, 1 CVE (transact)
+;; case 4 - 1 package, 1 CPE, n CVEs (transact)
+;; case 5 - 1 package, n CVEs
+;; case 6 - 1 package, 1 CPE, no CVEs (transact)
+;; case 7 - 1 package, n CPEs (different confidence, no CVEs (transact)
+;; case 8 - 1 package, n CPEs, n CVES (***) jetty-server
+;; case 9 - 1 package, 1 CPE, 1 CVE but SHADED - (*** humio-sender shades two libraries)
 (defn transact-dependency [request org repo commit {:keys [fileName license sha256 packages vulnerabilityIds vulnerabilities]}]
   (go-safe
-   (let [entities
-         (concat
-          (->> (seq vulnerabilityIds)
-               (map-indexed (fn [index {:keys [id confidence url]}]
-                              (let [cpe-evidence (gstring/format "cpe-evidence-%s-%d" fileName index)]
-                                [(merge
-                                  {:schema/entity-type :vulnerability/cpe
-                                   :schema/entity (gstring/format "vuln-%s-%d" fileName index)
-                                   :vulnerability.cpe/evidence {:add [cpe-evidence]}
-                                   :vulnerability.cpe/url id}
-                                  (when url {:vulnerability.cpe/search-url url}))
-                                 {:schema/entity-type :package/evidence
-                                  :schema/entity cpe-evidence
-                                  :package.evidence/dependency fileName
-                                  :package.evidence/source :package.evidence.source/DEPENDENCY_CHECK
-                                  :package.evidence/confidence confidence}])))
-               (apply concat))
-          (->> (seq packages)
-               (map-indexed (fn [index {:keys [id confidence url]}]
-                              (let [package-evidence (gstring/format "package-evidence-%s-%d" fileName index)]
-                                [{:schema/entity-type :package/url
-                                  :schema/entity (gstring/format "package-%s-%d" fileName index)
-                                  :package.url/evidence {:add [package-evidence]}
-                                  :package.url/url id
-                                  :package.url/search-url url}
-                                 {:schema/entity-type :package/evidence
-                                  :schema/entity package-evidence
-                                  :package.evidence/dependency fileName
-                                  :package.evidence/confidence confidence
-                                  :package.evidence/source :package.evidence.source/DEPENDENCY_CHECK}])))
-               (apply concat))
-          (->> (seq vulnerabilities)
-               (map-indexed (fn [index {:keys [source name severity description vulnerableSoftware cwes]
-                                        {:keys [score]} :cvssv2
-                                        {:keys [baseScore]} :cvssv3}]
-                              {:schema/entity-type :vulnerability/cve
-                               :schema/entity (gstring/format "cve-%s-%d" fileName index)
-                               :vulnerability.cve/source-id name
-                               :vulnerability.cve/source (keyword "vulnerability.cve.source" (s/upper-case source))
-                               :vulnerability.cve/description description
-                               :vulnerability.cve/severity (keyword "vulnerability.cve.severity"
-                                                                    (s/upper-case severity))
-                               :vulnerability.cve/cvss-score (str score)})))
-          [(merge {:schema/entity-type :package/dependency
-                   :schema/entity fileName
-                   :package.dependency/fileName fileName
-                   :package.dependency/sha256 sha256}
-                  (when license {:package.dependency/license license}))])]
-     ;; transact entities on to the Commit
+   (let [cpes (->> (seq vulnerabilityIds)
+                   (map-indexed (fn [index {:keys [id confidence url]}]
+                                  (let [cpe-evidence (gstring/format "cpe-evidence-%s-%d" fileName index)]
+                                    [(merge
+                                      {:schema/entity-type :vulnerability/cpe
+                                       :schema/entity (gstring/format "vuln-%s-%d" fileName index)
+                                       :vulnerability.cpe/evidence {:add [cpe-evidence]}
+                                       :vulnerability.cpe/url id}
+                                      (when url {:vulnerability.cpe/search-url url}))
+                                     {:schema/entity-type :package/evidence
+                                      :schema/entity cpe-evidence
+                                      :package.evidence/dependency fileName
+                                      :package.evidence/source :package.evidence.source/DEPENDENCY_CHECK
+                                      :package.evidence/confidence confidence}])))
+                   (apply concat))
+         purls (->> (seq packages)
+                    (map-indexed (fn [index {:keys [id confidence url]}]
+                                   (let [package-evidence (gstring/format "package-evidence-%s-%d" fileName index)]
+                                     [{:schema/entity-type :package/url
+                                       :schema/entity (gstring/format "package-%s-%d" fileName index)
+                                       :package.url/evidence {:add [package-evidence]}
+                                       :package.url/url id
+                                       :package.url/search-url url}
+                                      {:schema/entity-type :package/evidence
+                                       :schema/entity package-evidence
+                                       :package.evidence/dependency fileName
+                                       :package.evidence/confidence confidence
+                                       :package.evidence/source :package.evidence.source/DEPENDENCY_CHECK}])))
+                    (apply concat))
+         cves (->> (seq vulnerabilities)
+                   (map-indexed (fn [index {:keys [source name severity description vulnerableSoftware cwes]
+                                            {:keys [score]} :cvssv2
+                                            {:keys [baseScore]} :cvssv3}]
+                                  (let [matching-software (->> vulnerableSoftware (filter #(= "true" (-> % :software :vulnerabilityIdMatched))))
+                                        cve-ref (gstring/format "cve-%s-%d" fileName index)]
+                                    (merge
+                                     {:schema/entity-type :vulnerability/cve
+                                       :schema/entity cve-ref
+                                       :vulnerability.cve/source-id name
+                                       :vulnerability.cve/source (keyword "vulnerability.cve.source" (s/upper-case source))
+                                       :vulnerability.cve/description description
+                                       :vulnerability.cve/severity (keyword "vulnerability.cve.severity"
+                                                                            (s/upper-case severity))
+                                       :vulnerability.cve/cvss-score (str score)} 
+                                     (when (seq matching-software)
+                                       {:atomist/matching-software matching-software}))))))
+         ;; list of cpes, purls, cves, and one dependency
+         entities (concat
+                   (link-cpes cpes cves)
+                   (link-purls purls cves)
+                   (->> cves (map #(dissoc % :atomist/matching-software)) (into []))
+                   [(merge {:schema/entity-type :package/dependency
+                            :schema/entity fileName
+                            :package.dependency/fileName fileName
+                            :package.dependency/sha256 sha256}
+                           (when license {:package.dependency/license license}))])]
+     ;; link to Commit and transact
      (<? (api/transact
           request
           (->> entities
@@ -171,11 +262,7 @@
                   :git.commit/sha (:git.commit/sha commit)
                   :git.commit/repo "$repo"
 
-                            ;; add discovered vulnerabilities and dependencies to the Commit 
-                  :git.commit/vulnerabilities {:add (->> entities
-                                                         (filter #(= :vulnerability/cve (:schema/entity-type %)))
-                                                         (map :schema/entity)
-                                                         (into []))}
+                  ;; add discovered dependencies to the Commit 
                   :git.commit/dependencies {:add (->> entities
                                                       (filter #(= :package/dependency (:schema/entity-type %)))
                                                       (map :schema/entity)
@@ -211,21 +298,42 @@
                          {:code 0
                           :reason "owasp dependency scan complete and discoverable"}))))))
 
+(defn do-nothing [& args] (go true))
+(defn js-obj->entities [& args]
+  (go (-> args
+          first
+          (js->clj :keywordize-keys true)
+          :entities
+          (edn/read-string))))
+(defn print-all [& args] (go
+                           (let [entities (<! (apply js-obj->entities args))]
+                             (when (some is-cve? entities)
+                               (cljs.pprint/pprint entities))) 
+                           true))
+
 (comment
   (go
-    (<! ((transact-vulns #(go %))
-         {:atomist/org {:git.provider/url "url"}
+    (<! ((transact-vulns #(go (log/infof "end with %s" (:atomist/status %)) %))
+         {:correlation_id "corrid"
+          :sendreponse print-all
+          :atomist/org {:git.provider/url "url"}
           :atomist/repo {:git.repo/source-id "source-id"}
           :atomist/commit {:git.commit/sha "sha"}
           :atomist/dependency-report (json/->obj (io/slurp "dependency-check-report.json"))})))
+  (enable-console-print!)
   (pprint
    (-> (io/slurp "dependency-check-report.json")
        (json/->obj)
        :dependencies
        (as-> deps (->> deps
-                       (filter :vulnerabilities)
-                       (mapcat :vulnerabilities)
-                       (map #(select-keys % [:source])))))))
+                       (map (fn [dep]
+                              (select-keys dep [:vulnerabilities :vulnerabilityIds :packages :fileName])))
+                       (map (fn [dep]
+                              (-> dep
+                                  (merge
+                                   (when (seq (:vulnerabilities dep))
+                                     {:cve-count (count (:vulnerabilities dep))}))
+                                  (dissoc :vulnerabilities)))) (map #(->> %)))))))
 
 (defn spawn [command args]
   (go-safe
@@ -311,8 +419,15 @@
 (defn neutral-milk-party [handler]
   (fn [request]
     (go-safe
-     (let [{:git.commit/keys [vulnerabilities]} (-> request :subscription :result first first)
-           summary (gstring/format "vulnerabilities %s" vulnerabilities)]
+     (let [{:git.commit/keys [sha]} (-> request :subscription :result first first)
+           summary (->> (-> request :subscription :result first)
+                        (map second)
+                        (map (fn [{:vulnerability.cve/keys [source-id source cvss-score]
+                                   cpes :vulnerability.cpe/_cves
+                                   packages :package.url/_cves}] 
+                               (gstring/format "%-20s%-10s(%-5s) -- %s - %s" source-id source cvss-score cpes packages)))
+                        (interpose "\n* ")
+                        (apply str))]
        (<? (handler (assoc request
                            :atomist/status {:code 0 :reason "discovered scan"}
                            :checkrun/output {:title "OWasp Scan Results"
