@@ -109,8 +109,8 @@
                            :token (-> repo :git.repo/org :github.org/installation-token))))))))
 
 (defn prn-matching-software [{{:keys [id versionStartIncluding versionEndIncluding versionStartExcluding versionEndExcluding]} :software}]
-  (gstring/format "%s-%s%s,%s%s" 
-                  id 
+  (gstring/format "%s-%s%s,%s%s"
+                  id
                   (cond versionStartExcluding "(" versionStartIncluding "[" :else "(")
                   (or versionStartIncluding versionStartExcluding "")
                   (cond versionEndExcluding "(" versionEndIncluding "[" :else "(")
@@ -123,8 +123,8 @@
   "check whether cpe matches the cve using it's matching software data"
   [{:as cpe :vulnerability.cpe/keys [url]}
    {:atomist/keys [matching-software]}]
-  (log/infof "compare cpe %s to matching softwares %s" 
-             (:vulnerability.cpe/url cpe) 
+  (log/infof "compare cpe %s to matching softwares %s"
+             (:vulnerability.cpe/url cpe)
              (->> matching-software (map prn-matching-software) (interpose ",") (apply str)))
   (->> matching-software
        (some #(let [{{:keys [id versionStartIncluding versionStartExcluding versionEndIncluding versionEndExcluding]} :software} %]
@@ -137,11 +137,11 @@
 (def is-cve? #(= :vulnerability/cve (:schema/entity-type %)))
 (def is-cpe? #(= :vulnerability/cpe (:schema/entity-type %)))
 (def is-package-url? #(= :package/url (:schema/entity-type %)))
-(def known-source? #(#{:vulnerability.cve.source/NVD :vulnerability.cve.source/RETIREJS :vulnerability.cve.source/OSSINDEX} 
-                      (:vulnerability.cve/source %)))
+(def known-source? #(#{:vulnerability.cve.source/NVD :vulnerability.cve.source/RETIREJS :vulnerability.cve.source/OSSINDEX}
+                     (:vulnerability.cve/source %)))
 
 (defn link-cpes
-  "when a cve has a cpe match, link it to the correct cpe by adding a reference to the :vulnerability.cpe/cves attribute" 
+  "when a cve has a cpe match, link it to the correct cpe by adding a reference to the :vulnerability.cpe/cves attribute"
   [cpes cves]
   (->> cpes
        (map (fn [{:as cpe}]
@@ -228,13 +228,13 @@
                                         cve-ref (gstring/format "cve-%s-%d" fileName index)]
                                     (merge
                                      {:schema/entity-type :vulnerability/cve
-                                       :schema/entity cve-ref
-                                       :vulnerability.cve/source-id name
-                                       :vulnerability.cve/source (keyword "vulnerability.cve.source" (s/upper-case source))
-                                       :vulnerability.cve/description description
-                                       :vulnerability.cve/severity (keyword "vulnerability.cve.severity"
-                                                                            (s/upper-case severity))
-                                       :vulnerability.cve/cvss-score (str score)} 
+                                      :schema/entity cve-ref
+                                      :vulnerability.cve/source-id name
+                                      :vulnerability.cve/source (keyword "vulnerability.cve.source" (s/upper-case source))
+                                      :vulnerability.cve/description description
+                                      :vulnerability.cve/severity (keyword "vulnerability.cve.severity"
+                                                                           (s/upper-case severity))
+                                      :vulnerability.cve/cvss-score (str score)}
                                      (when (seq matching-software)
                                        {:atomist/matching-software matching-software}))))))
          ;; list of cpes, purls, cves, and one dependency
@@ -308,7 +308,7 @@
 (defn print-all [& args] (go
                            (let [entities (<! (apply js-obj->entities args))]
                              (when (some is-cve? entities)
-                               (cljs.pprint/pprint entities))) 
+                               (cljs.pprint/pprint entities)))
                            true))
 
 (comment
@@ -424,7 +424,7 @@
                         (map second)
                         (map (fn [{:vulnerability.cve/keys [source-id source cvss-score]
                                    cpes :vulnerability.cpe/_cves
-                                   packages :package.url/_cves}] 
+                                   packages :package.url/_cves}]
                                (gstring/format "%-20s%-10s(%-5s) -- %s - %s" source-id source cvss-score cpes packages)))
                         (interpose "\n* ")
                         (apply str))]
