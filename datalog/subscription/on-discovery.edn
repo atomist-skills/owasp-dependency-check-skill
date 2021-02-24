@@ -54,7 +54,9 @@
  [?discovery :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER]
  [?discovery :dependency.analysis.discovery/commit ?commit]
  [?commit :git.commit/dependency-evidence ?evidence]
- (or (and [?evidence :vulnerability.cpe/evidence ?cpe]
-          [?cpe :vulnerability.cpe/cves ?cve])
-     (and [?evidence :package.url/evidence ?purl]
-          [?purl :package.url/cves ?cve]))]
+ [?evidence :package.evidence/dependency ?deps]
+ (or-join [?cve]
+          (and [?cpe :vulnerability.cpe/evidence ?evidence]
+               [?cpe :vulnerability.cpe/cves ?cve])
+          (and [?purl :package.url/evidence ?evidence]
+               [?purl :package.url/cves ?cve]))]
