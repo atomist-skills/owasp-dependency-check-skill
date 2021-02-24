@@ -263,10 +263,11 @@
                   :git.commit/repo "$repo"
 
                   ;; add discovered dependencies to the Commit 
-                  :git.commit/dependencies {:add (->> entities
-                                                      (filter #(= :package/dependency (:schema/entity-type %)))
-                                                      (map :schema/entity)
-                                                      (into []))}}])
+                  :git.commit/dependency-evidence
+                  {:add (->> entities
+                             (filter #(= :package/evidence (:schema/entity-type %)))
+                             (map :schema/entity)
+                             (into []))}}])
                (into [])))))))
 
 (defn transact-vulns [handler]

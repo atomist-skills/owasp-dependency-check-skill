@@ -64,9 +64,7 @@
                                :db/cardinality :db.cardinality/many}
   :vulnerability.cpe/cves {:db/valueType :db.type/ref
                            :db/cardinality :db.cardinality/many}
-  ;; adding some attributes to the Commit
-  :git.commit/dependencies {:db/valueType :db.type/ref
-                            :db/cardinality :db.cardinality/many}
 
-  :git.commit/vulnerabilities {:db/valueType :db.type/ref
-                               :db/cardinality :db.cardinality/many}}}
+  ;; adding some attributes to the Commit
+  :git.commit/dependency-evidence {:db/valueType :db.type/ref
+                                   :db/cardinality :db.cardinality/many}}}
