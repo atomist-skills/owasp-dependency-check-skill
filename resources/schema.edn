@@ -13,7 +13,9 @@
 ;; limitations under the License.
 
 {:attributes
- {:package/url {:db.entity/attrs [:package.url/url]}
+ {;; package/url
+  
+  :package/url {:db.entity/attrs [:package.url/url]}
   :package.url/url {:db/valueType :db.type/string
                     :db/cardinality :db.cardinality/one}
   :package.url/evidence {:db/valueType :db.type/ref
@@ -23,7 +25,10 @@
   :package.url/cves {:db/valueType :db.type/ref
                      :db/cardinality :db.cardinality/many }
 
-  :package/evidence {:db.entity/attrs [:schema/random-guid]}
+  ;; package/evidence
+  :package/evidence {:db.entity/attrs [:package.evidence/commit :package.evidence/dependency]}
+  :package.evidence/commit {:db/valueType :db.type/ref
+                            :db/cardinality :db.cardinality/one}
   :package.evidence/dependency {:db/valueType :db.type/ref
                                 :db/cardinality :db.cardinality/one}
   :package.evidence/source {:db/valueType :db.type/ref
@@ -32,6 +37,7 @@
                                 :db/cardinality :db.cardinality/one}
   :package.evidence.source/DEPENDENCY_CHECK {}
 
+  ;; package/dependency
   :package/dependency {:db.entity/attrs [:package.dependency/sha256]}
   :package.dependency/sha256 {:db/valueType :db.type/string
                               :db/cardinality :db.cardinality/one}
@@ -40,6 +46,7 @@
   :package.dependency/license {:db/valueType :db.type/string
                                :db/cardinality :db.cardinality/one}
 
+  ;; dependency.analysis/discovery
   :dependency.analysis/discovery {:db.entity/attrs [:dependency.analysis.discovery/commit]}
   :dependency.analysis.discovery/commit {:db/valueType :db.type/ref
                                          :db/cardinality :db.cardinality/one}
@@ -65,6 +72,4 @@
   :vulnerability.cpe/cves {:db/valueType :db.type/ref
                            :db/cardinality :db.cardinality/many}
 
-  ;; adding some attributes to the Commit
-  :git.commit/dependency-evidence {:db/valueType :db.type/ref
-                                   :db/cardinality :db.cardinality/many}}}
+  }}

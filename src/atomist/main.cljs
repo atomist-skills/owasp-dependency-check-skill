@@ -191,32 +191,37 @@
 ;; case 9 - 1 package, 1 CPE, 1 CVE but SHADED - (*** humio-sender shades two libraries)
 (defn transact-dependency [request org repo commit {:keys [fileName license sha256 packages vulnerabilityIds vulnerabilities]}]
   (go-safe
-   (let [cpes (->> (seq vulnerabilityIds)
+   (let [commit "$commit"
+         cpes (->> (seq vulnerabilityIds)
                    (map-indexed (fn [index {:keys [id confidence url]}]
-                                  (let [cpe-evidence (gstring/format "cpe-evidence-%s-%d" fileName index)]
+                                  (let [cpe-evidence (gstring/format "cpe-evidence-%s-%d" fileName index)
+                                        cpe (gstring/format "cpe-%s-%d" fileName index)]
                                     [(merge
                                       {:schema/entity-type :vulnerability/cpe
-                                       :schema/entity (gstring/format "vuln-%s-%d" fileName index)
-                                       :vulnerability.cpe/evidence {:add [cpe-evidence]}
+                                       :schema/entity cpe
                                        :vulnerability.cpe/url id}
                                       (when url {:vulnerability.cpe/search-url url}))
                                      {:schema/entity-type :package/evidence
                                       :schema/entity cpe-evidence
+                                      :package.evidence/commit commit
                                       :package.evidence/dependency fileName
+                                      :package.evidence/cpe cpe
                                       :package.evidence/source :package.evidence.source/DEPENDENCY_CHECK
                                       :package.evidence/confidence confidence}])))
                    (apply concat))
          purls (->> (seq packages)
                     (map-indexed (fn [index {:keys [id confidence url]}]
-                                   (let [package-evidence (gstring/format "package-evidence-%s-%d" fileName index)]
+                                   (let [package-evidence (gstring/format "package-evidence-%s-%d" fileName index)
+                                         purl (gstring/format "package-%s-%d" fileName index)]
                                      [{:schema/entity-type :package/url
-                                       :schema/entity (gstring/format "package-%s-%d" fileName index)
-                                       :package.url/evidence {:add [package-evidence]}
+                                       :schema/entity purl
                                        :package.url/url id
                                        :package.url/search-url url}
                                       {:schema/entity-type :package/evidence
                                        :schema/entity package-evidence
+                                       :package.evidence/commit commit
                                        :package.evidence/dependency fileName
+                                       :package.evidence/purl purl
                                        :package.evidence/confidence confidence
                                        :package.evidence/source :package.evidence.source/DEPENDENCY_CHECK}])))
                     (apply concat))
@@ -257,17 +262,10 @@
                   :git.provider/url (:git.provider/url org)
                   :git.repo/source-id (:git.repo/source-id repo)}
                  {:schema/entity-type :git/commit
-                  :schema/entity "$commit"
+                  :schema/entity commit
                   :git.provider/url (:git.provider/url org)
                   :git.commit/sha (:git.commit/sha commit)
-                  :git.commit/repo "$repo"
-
-                  ;; add discovered dependencies to the Commit 
-                  :git.commit/dependency-evidence
-                  {:add (->> entities
-                             (filter #(= :package/evidence (:schema/entity-type %)))
-                             (map :schema/entity)
-                             (into []))}}])
+                  :git.commit/repo "$repo"}])
                (into [])))))))
 
 (defn transact-vulns [handler]
@@ -423,10 +421,13 @@
      (let [{:git.commit/keys [sha]} (-> request :subscription :result first first)
            summary (->> (-> request :subscription :result first)
                         (map second)
-                        (map (fn [{:vulnerability.cve/keys [source-id source cvss-score]
-                                   cpes :vulnerability.cpe/_cves
-                                   packages :package.url/_cves}]
-                               (gstring/format "%-20s%-10s(%-5s) -- %s - %s" source-id source cvss-score cpes packages)))
+                        (map (fn [{:package.evidence/keys [confidence source purl cpe]}
+                                  {{:package.dependency/keys [license fileName]} :package.evidence/dependency}]
+                               (or
+                                (if-let [{:package.url/keys [url]} purl]
+                                  (gstring/format "%s, %s, %s, %s, %s" url source confidence fileName license))
+                                (if-let [{:vulnerability.cpe/keys [url]} cpe]
+                                  (gstring/format "%s, %s, %s, %s, %s" url source confidence fileName license)))))
                         (interpose "\n* ")
                         (apply str))]
        (<? (handler (assoc request

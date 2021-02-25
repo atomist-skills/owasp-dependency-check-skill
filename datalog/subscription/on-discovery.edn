@@ -29,33 +29,32 @@
                   :git.user/name
                   {:git.user/emails [:email.email/address]}]}
                 :git.commit/sha])
- (pull ?cve [:vulnerability.cve/source
-             :vulnerability.cpe/evidence
-             :vulnerability.cve/source-id
-             :vulnerability.cve/cvss-score
-             {:vulnerability.cpe/_cves
-              [{:vulnerability.cpe/evidence
-                [{:package.evidence/dependency
-                  [:package.dependency/license
-                   :package.dependency/fileName]}
-                 :package.evidence/confidence
-                 :package.evidence/source]}]}
-             {:package.url/_cves
-              [{:package.url/evidence
-                [{:package.evidence/dependency
-                  [:package.dependency/license
-                   :package.dependency/fileName]}
-                 :package.evidence/confidence
-                 :package.evidence/source]}]}])
+ (pull ?evidence [{:package.evidence/dependency
+                   [:package.dependency/license
+                    :package.dependency/fileName]}
+                  :package.evidence/confidence
+                  :package.evidence/source
+                  {:package.evidence/purl 
+                   [:package.url/url
+                    {:package.url/cves
+                     [:vulnerability.cve/source
+                      :vulnerability.cve/cvss-score
+                      :vulnerability.cve/source-id]}]}
+                  {:package.evidence/cpe
+                   [:vulnerability.cve/source-id
+                    {:vulnerability.cpe/cves
+                     [:vulnerability.cve/source
+                      :vulnerability.cve/cvss-score
+                      :vulnerability.cve/source-id]}]}])
  :in $ $before %
  :where
  (tx-entity-attr-value :dependency.analysis.discovery/status ?discovery ?status)
  [?discovery :dependency.analysis.discovery/status :dependency.analysis.discovery.status/COMPLETE]
  [?discovery :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER]
  [?discovery :dependency.analysis.discovery/commit ?commit]
- [?commit :git.commit/dependency-evidence ?evidence]
+ [?evidence :package.evidence/commit ?commit]
  (or-join [?evidence ?cve]
-          (and [?cpe :vulnerability.cpe/evidence ?evidence]
+          (and [?evidence :package.evidence/cpe ?cpe]
                [?cpe :vulnerability.cpe/cves ?cve])
-          (and [?purl :package.url/evidence ?evidence]
+          (and [?evidence :package.evidence/purl ?purl]
                [?purl :package.url/cves ?cve]))]
