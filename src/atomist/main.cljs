@@ -191,7 +191,7 @@
 ;; case 9 - 1 package, 1 CPE, 1 CVE but SHADED - (*** humio-sender shades two libraries)
 (defn transact-dependency [request org repo commit {:keys [fileName license sha256 packages vulnerabilityIds vulnerabilities]}]
   (go-safe
-   (let [commit "$commit"
+   (let [commit-ref "$commit"
          cpes (->> (seq vulnerabilityIds)
                    (map-indexed (fn [index {:keys [id confidence url]}]
                                   (let [cpe-evidence (gstring/format "cpe-evidence-%s-%d" fileName index)
@@ -203,7 +203,7 @@
                                       (when url {:vulnerability.cpe/search-url url}))
                                      {:schema/entity-type :package/evidence
                                       :schema/entity cpe-evidence
-                                      :package.evidence/commit commit
+                                      :package.evidence/commit commit-ref
                                       :package.evidence/dependency fileName
                                       :package.evidence/cpe cpe
                                       :package.evidence/source :package.evidence.source/DEPENDENCY_CHECK
@@ -219,7 +219,7 @@
                                        :package.url/search-url url}
                                       {:schema/entity-type :package/evidence
                                        :schema/entity package-evidence
-                                       :package.evidence/commit commit
+                                       :package.evidence/commit commit-ref
                                        :package.evidence/dependency fileName
                                        :package.evidence/purl purl
                                        :package.evidence/confidence confidence
@@ -262,7 +262,7 @@
                   :git.provider/url (:git.provider/url org)
                   :git.repo/source-id (:git.repo/source-id repo)}
                  {:schema/entity-type :git/commit
-                  :schema/entity commit
+                  :schema/entity commit-ref
                   :git.provider/url (:git.provider/url org)
                   :git.commit/sha (:git.commit/sha commit)
                   :git.commit/repo "$repo"}])
