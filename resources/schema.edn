@@ -14,16 +14,13 @@
 
 {:attributes
  {;; package/url
-  
   :package/url {:db.entity/attrs [:package.url/url]}
   :package.url/url {:db/valueType :db.type/string
                     :db/cardinality :db.cardinality/one}
-  :package.url/evidence {:db/valueType :db.type/ref
-                         :db/cardinality :db.cardinality/many}
   :package.url/search-url {:db/valueType :db.type/string
                            :db/cardinality :db.cardinality/one}
   :package.url/cves {:db/valueType :db.type/ref
-                     :db/cardinality :db.cardinality/many }
+                     :db/cardinality :db.cardinality/many}
 
   ;; package/evidence
   :package/evidence {:db.entity/attrs [:package.evidence/commit :package.evidence/dependency]}
@@ -35,6 +32,10 @@
                             :db/cardinality :db.cardinality/one}
   :package.evidence/confidence {:db/valueType :db.type/string
                                 :db/cardinality :db.cardinality/one}
+  :package.evidence/cpe {:db/valueType :db.type/ref
+                         :db/cardinality :db.cardinality/one}
+  :package.evidence/purl {:db/valueType :db.type/ref
+                          :db/cardinality :db.cardinality/one}
   :package.evidence.source/DEPENDENCY_CHECK {}
 
   ;; package/dependency
@@ -67,9 +68,5 @@
   ;; adding some attributes to the vulnerability.cpe
   :vulnerability.cpe/search-url {:db/valueType :db.type/string
                                  :db/cardinality :db.cardinality/one}
-  :vulnerability.cpe/evidence {:db/valueType :db.type/ref
-                               :db/cardinality :db.cardinality/many}
   :vulnerability.cpe/cves {:db/valueType :db.type/ref
-                           :db/cardinality :db.cardinality/many}
-
-  }}
+                           :db/cardinality :db.cardinality/many}}}
