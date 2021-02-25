@@ -110,7 +110,7 @@ ISC License - [https://www.isc.org/downloads/software-support-policy/isc-license
 
 | Name                | Version  | Publisher          | Repository                                                                               |
 | ------------------- | -------- | ------------------ | ---------------------------------------------------------------------------------------- |
-| `fastq`             | `1.10.1` | Matteo Collina     | [https://github.com/mcollina/fastq](https://github.com/mcollina/fastq)                   |
+| `fastq`             | `1.11.0` | Matteo Collina     | [https://github.com/mcollina/fastq](https://github.com/mcollina/fastq)                   |
 | `fs.realpath`       | `1.0.0`  | Isaac Z. Schlueter | [https://github.com/isaacs/fs.realpath](https://github.com/isaacs/fs.realpath)           |
 | `glob-parent`       | `5.1.1`  | Gulp Team          | [https://github.com/gulpjs/glob-parent](https://github.com/gulpjs/glob-parent)           |
 | `glob`              | `7.1.6`  | Isaac Z. Schlueter | [https://github.com/isaacs/node-glob](https://github.com/isaacs/node-glob)               |
@@ -245,7 +245,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.17` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.18` | jim@atomist.com |            |
 
 ## Contact
 
