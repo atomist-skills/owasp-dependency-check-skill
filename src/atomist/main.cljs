@@ -433,13 +433,20 @@
                     :source (-> source :db/ident name)
                     :cves (->> (or (:vulnerability.cpe/cves cpe) (:package.url/cves purl))
                                (map (fn [{:vulnerability.cve/keys [cvss-score source-id]}]
-                                      {:cvss-source cvss-score
+                                      {:cvss-score cvss-score
                                        :id source-id}))
                                (into []))}))))
        (reduce (fn [s {:keys [license fileName confidence source cves cpe purl]}]
                  (str s "\n" (gstring/format
                               "|%s|%s|%s|%s|%s|%s|"
-                              (str (or purl "") "<br/>" (or cpe ""))
+                              (str
+                               (if purl
+                                 (gstring/format "`%s`" purl)
+                                 "")
+                               "<br/>"
+                               (if cpe
+                                 (gstring/format "`%s`" cpe)
+                                 ""))
                               fileName
                               confidence
                               source
@@ -453,6 +460,14 @@
                 "|package|fileName|confidence|source|CVEs|license|"
                 "\n"
                 "| :---   | :---    | :----     | :---- | :--- | :--- |"))))
+
+(comment
+  (enable-console-print!)
+  (println
+   (-> (io/slurp "resources/data-on-discovery.edn")
+       (edn/read-string)
+       (report))))
+
 
 (defn neutral-milk-party [handler]
   (fn [request]
