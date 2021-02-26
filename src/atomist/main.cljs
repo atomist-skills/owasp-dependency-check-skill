@@ -414,6 +414,7 @@
          (assoc request
                 :atomist/status {:code 1
                                  :reason (gstring/format "Update failed:  %s" (.-message ex))}))))))
+
 (defn report [x]
   (->> x
        (map second)
@@ -453,7 +454,7 @@
                               (->> cves
                                    (map (fn [{:keys [cvss-score id]}]
                                           (gstring/format "(%s,%s)" id (or cvss-score ""))))
-                                   (interpose "<br/>")
+                                   (interpose ", ")
                                    (apply str))
                               (or license "unknown"))))
                (str
