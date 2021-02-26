@@ -414,22 +414,51 @@
          (assoc request
                 :atomist/status {:code 1
                                  :reason (gstring/format "Update failed:  %s" (.-message ex))}))))))
+(defn report [x]
+  (->> x
+       (map second)
+       (map (fn [{:package.evidence/keys [confidence source purl cpe]
+                  {:package.dependency/keys [license fileName]} :package.evidence/dependency}]
+              (-> {}
+                  (merge
+                   (if purl
+                     {:purl (:package.url/url purl)}))
+                  (merge
+                   (if cpe
+                     {:cpe (:vulnerability.cpe/url cpe)}))
+                  (merge
+                   {:license license
+                    :fileName fileName
+                    :confidence confidence
+                    :source (-> source :db/ident name)
+                    :cves (->> (or (:vulnerability.cpe/cves cpe) (:package.url/cves purl))
+                               (map (fn [{:vulnerability.cve/keys [cvss-score source-id]}]
+                                      {:cvss-source cvss-score
+                                       :id source-id}))
+                               (into []))}))))
+       (reduce (fn [s {:keys [license fileName confidence source cves cpe purl]}]
+                 (str s "\n" (gstring/format
+                              "|%s|%s|%s|%s|%s|%s|"
+                              (str (or purl "") "<br/>" (or cpe ""))
+                              fileName
+                              confidence
+                              source
+                              (->> cves
+                                   (map (fn [{:keys [cvss-score id]}]
+                                          (gstring/format "(%s,%s)" id (or cvss-score ""))))
+                                   (interpose "<br/>")
+                                   (apply str))
+                              (or license "unknown"))))
+               (str
+                "|package|fileName|confidence|source|CVEs|license|"
+                "\n"
+                "|:---   |:---    |:----     |:---- |:--- |"))))
 
 (defn neutral-milk-party [handler]
   (fn [request]
     (go-safe
      (let [{:git.commit/keys [sha]} (-> request :subscription :result first first)
-           summary (->> (-> request :subscription :result first)
-                        (map second)
-                        (map (fn [{:package.evidence/keys [confidence source purl cpe]}
-                                  {{:package.dependency/keys [license fileName]} :package.evidence/dependency}]
-                               (or
-                                (if-let [{:package.url/keys [url]} purl]
-                                  (gstring/format "%s, %s, %s, %s, %s" url source confidence fileName license))
-                                (if-let [{:vulnerability.cpe/keys [url]} cpe]
-                                  (gstring/format "%s, %s, %s, %s, %s" url source confidence fileName license)))))
-                        (interpose "\n* ")
-                        (apply str))]
+           summary (report (-> request :subscription :result))]
        (<? (handler (assoc request
                            :atomist/status {:code 0 :reason "discovered scan"}
                            :checkrun/output {:title "OWasp Scan Results"
