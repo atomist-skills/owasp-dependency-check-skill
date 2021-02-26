@@ -452,7 +452,7 @@
                (str
                 "|package|fileName|confidence|source|CVEs|license|"
                 "\n"
-                "|:---   |:---    |:----     |:---- |:--- |"))))
+                "| :---   | :---    | :----     | :---- | :--- | :--- |"))))
 
 (defn neutral-milk-party [handler]
   (fn [request]
@@ -462,7 +462,8 @@
        (<? (handler (assoc request
                            :atomist/status {:code 0 :reason "discovered scan"}
                            :checkrun/output {:title "OWasp Scan Results"
-                                             :summary summary}
+                                             :summary "summary"
+                                             :text summary}
                            :checkrun/conclusion "neutral")))))))
 
 (defn ^:export handler
