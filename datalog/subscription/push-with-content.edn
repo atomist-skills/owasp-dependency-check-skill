@@ -13,7 +13,7 @@
  ?usage
  :in $ $before-db %
  :where
- (get-config-value "other-files-to-index" ["project.clj"] ?path-exists)
+ (get-config-value "other-files-to-index" ["project.clj" "deps.edn"] ?path-exists)
  (get-config-value "path-not-exists" [] ?path-not-exists)
  (get-config-value "branch-filters" [] ?branch-filters)
  (tx-push-with-content ?branch-filters false ?path-exists ?path-not-exists ?commit)

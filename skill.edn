@@ -37,7 +37,6 @@
   {:fileFilter
    {:name "other-files-to-index"
     :description "Paths to index"
-    :visibility "hidden"
     :defaultValue ["project.clj"]
     :required false}}
   {:stringArray
