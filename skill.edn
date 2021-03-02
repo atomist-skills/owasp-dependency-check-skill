@@ -38,7 +38,7 @@
    {:name "other-files-to-index"
     :description "Paths to index"
     :visibility "hidden"
-    :defaultValue ["project.clj"]
+    :defaultValue ["project.clj" "deps.edn"]
     :required false}}
   {:stringArray
    {:name "branch-filters"

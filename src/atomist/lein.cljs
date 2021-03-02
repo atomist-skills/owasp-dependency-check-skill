@@ -17,32 +17,73 @@
             [atomist.async :refer [go-safe <?]]
             [cljs.core.async :refer [<!] :refer-macros [go]]
             [cljs-node-io.proc :as proc]
-            [clojure.string :as s]
+            [clojure.string :as str]
             [atomist.cljs-log :as log]
             [goog.string :as gstring]
             [goog.string.format]))
 
-(defn get-jars [project-dir target-dir maven-repos]
+(defn add-lein-profiles 
+  "add the lein profiles.clj in all cases (even if there's no lein project.clj)"
+  [handler]
+  (fn [request]
+    (go-safe
+     (let [repo-map (reduce
+                     (fn [acc [_ repo usage]]
+                       (if (and repo usage)
+                         (update acc (keyword usage) (fn [repos]
+                                                       (conj (or repos []) repo)))
+                         acc))
+                     {}
+                     (-> request :subscription :result))]
+
+       (log/infof "Found resolve integration: %s"
+                  (->> (:resolve repo-map)
+                       (map #(gstring/format "%s - %s" (:maven.repository/repository-id %) (:maven.repository/url %)))
+                       (str/join ", ")))
+
+       (io/spit
+        (io/file (-> request :project :path) "profiles.clj")
+        (pr-str
+         {:resolve-repos
+           {:repositories (->> (:resolve repo-map)
+                               (map (fn [{:maven.repository/keys [repository-id url username secret]}]
+                                      (log/infof "add-resolve profiles.clj profile for %s with user %s and password %s"
+                                                 url
+                                                 username
+                                                 (apply str (take (count secret) (repeat 'X))))
+                                      [repository-id {:url url
+                                                      :username username
+                                                      :password secret}]))
+                               (into []))}}))
+       (<! (handler request))))))
+
+(defn get-jars
+  "copy all jars into the scan dir" 
+  [project-dir target-dir]
   (go-safe
-   (log/info "maven repos " (->> maven-repos
-                                 (map #(let [{:maven.repository/keys [repository-id url username secret]} %] url))
-                                 (interpose ",")
-                                 (apply str)))
    (when (.exists project-dir)
      (.mkdirs target-dir)
-     (let [[err stdout stderr] (<? (proc/aexec "lein cp" {:cwd (.getPath project-dir)
-                                                          :env {"MVN_ARTIFACTORYMAVENREPOSITORY_USER"
-                                                                (-> maven-repos first :maven.repository/username)
-                                                                "MVN_ARTIFACTORYMAVENREPOSITORY_PWD"
-                                                                (-> maven-repos first :maven.repository/secret)}}))]
+     (let [[err stdout stderr] (<? (proc/aexec "lein with-profile resolve-repos cp"
+                                               {:cwd (.getPath project-dir)}))]
        (when err
          (log/error stderr)
          (throw (ex-info "failed to run `lein cp`" {:stderr stderr})))
-       (doseq [path (s/split stdout #":")]
+       (doseq [path (str/split stdout #":")]
          (<? (proc/aexec (gstring/format "cp %s %s" path (.getPath target-dir)))))))))
 
 (comment
   (go
-    (<! (get-jars (io/file "/Users/slim/atmhq/bot-service") (io/file "jar-lib") [{:maven.repository/url "url"
-                                                                                  :maven.repository/username ""
-                                                                                  :maven.repository/secret ""}]))))
+    (<! ((-> (fn [request]
+               (go
+                 (<! (get-jars (io/file (-> request :project :path)) (io/file "jar-lib")))
+                 request))
+             (add-lein-profiles))
+         {:project
+          {:path "/Users/slim/atmhq/bot-service"}
+          :subscription
+          {:result [[nil
+                     {:maven.repository/repository-id "repo-id"
+                      :maven.repository/url "url"
+                      :maven.repository/username "username"
+                      :maven.repository/secret "password"}
+                     "resolve"]]}}))))

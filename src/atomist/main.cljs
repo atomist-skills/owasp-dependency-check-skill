@@ -15,6 +15,7 @@
 (ns atomist.main
   (:require [atomist.api :as api]
             [atomist.lein :as lein]
+            [atomist.clojure :as clojure]
             [cljs.pprint :refer [pprint]]
             [cljs.core.async :refer [<! >!] :refer-macros [go] :as async]
             [atomist.async :refer-macros [go-safe <?]]
@@ -358,20 +359,18 @@
     (go-safe
      (api/trace "run-scan")
      (try
-       (let [repo-map (reduce
-                       (fn [acc [_ repo usage]]
-                         (if (and repo usage)
-                           (update acc (keyword usage) (fn [repos]
-                                                         (conj (or repos []) repo)))
-                           acc))
-                       {}
-                       (-> request :subscription :result))
+       (let [project-dir (io/file (-> request :project :path))
              scan-dir (io/file "scan-dir")
              commit (-> request :subscription :result first first)
              repo (:git.commit/repo commit)
-             org (:git.repo/org repo)]
+             org (:git.repo/org repo)
+             deps-edn (io/file project-dir "deps.edn")
+             project-clj (io/file project-dir "project.clj")]
          (.mkdirs scan-dir)
-         (<? (lein/get-jars (io/file (-> request :project :path)) scan-dir (:resolve repo-map)))
+         (when (.exists project-clj)
+           (<? (lein/get-jars project-dir scan-dir)))
+         (when (.exists deps-edn)
+           (<? (clojure/get-jars project-dir scan-dir)))
          (let [command (.. js/process -env -DEPENDENCY_CHECK)
                args ["--project" (:git.repo/name repo)
                      "--scan" (.getPath scan-dir)
@@ -433,13 +432,14 @@
                     :confidence confidence
                     :source (-> source :db/ident name)
                     :cves (->> (or (:vulnerability.cpe/cves cpe) (:package.url/cves purl))
-                               (map (fn [{:vulnerability.cve/keys [cvss-score source-id]}]
+                               (map (fn [{:vulnerability.cve/keys [severity cvss-score source-id]}]
                                       {:cvss-score cvss-score
-                                       :id source-id}))
+                                       :id source-id
+                                       :severity severity}))
                                (into []))}))))
        (reduce (fn [s {:keys [license fileName confidence source cves cpe purl]}]
                  (str s "\n" (gstring/format
-                              "|%s|%s|%s|%s|%s|%s|"
+                              "|%s|%s|%s|%s|%s|"
                               (str
                                (if purl
                                  (gstring/format "`%s`" purl)
@@ -452,15 +452,15 @@
                               confidence
                               source
                               (->> cves
-                                   (map (fn [{:keys [cvss-score id]}]
-                                          (gstring/format "(%s,%s)" id (or cvss-score ""))))
+                                   (map (fn [{:keys [severity cvss-score id]}]
+                                          (gstring/format "(%s, %s, cvss=%s)" id (or severity "") (or cvss-score ""))))
                                    (interpose ", ")
                                    (apply str))
                               (or license "unknown"))))
                (str
-                "|package|fileName|confidence|source|CVEs|license|"
+                "|package|fileName|confidence|CVEs |license|"
                 "\n"
-                "| :---   | :---    | :----     | :---- | :--- | :--- |"))))
+                "| :---  | :---   | :----    | :-- | :---  |"))))
 
 (comment
   (enable-console-print!)
@@ -493,6 +493,8 @@
                          :default (-> (api/finished)
                                       (transact-vulns)
                                       (run-scan)
+                                      (lein/add-lein-profiles)
+                                      (clojure/add-mvn-repos-to-deps-edn)
                                       (api/clone-ref)
                                       #_(api/with-github-check-run :name "owasp-dependency-check")
                                       (create-ref-from-event))})

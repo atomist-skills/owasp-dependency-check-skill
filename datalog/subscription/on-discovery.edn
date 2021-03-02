@@ -39,12 +39,14 @@
                     {:package.url/cves
                      [:vulnerability.cve/source
                       :vulnerability.cve/cvss-score
+                      :vulnerability.cve/severity
                       :vulnerability.cve/source-id]}]}
                   {:package.evidence/cpe
                    [:vulnerability.cpe/url
                     {:vulnerability.cpe/cves
                      [:vulnerability.cve/source
                       :vulnerability.cve/cvss-score
+                      :vulnerability.cve/severity
                       :vulnerability.cve/source-id]}]}])
  :in $ $before %
  :where
