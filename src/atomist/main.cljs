@@ -435,7 +435,7 @@
                                (map (fn [{:vulnerability.cve/keys [severity cvss-score source-id]}]
                                       {:cvss-score cvss-score
                                        :id source-id
-                                       :severity severity}))
+                                       :severity (-> severity :db/ident keyword name)}))
                                (into []))}))))
        (reduce (fn [s {:keys [license fileName confidence source cves cpe purl]}]
                  (str s "\n" (gstring/format
@@ -450,7 +450,6 @@
                                  ""))
                               fileName
                               confidence
-                              source
                               (->> cves
                                    (map (fn [{:keys [severity cvss-score id]}]
                                           (gstring/format "(%s, %s, cvss=%s)" id (or severity "") (or cvss-score ""))))
