@@ -22,7 +22,7 @@
             [goog.string :as gstring]
             [goog.string.format]))
 
-(defn add-lein-profiles 
+(defn add-lein-profiles
   "add the lein profiles.clj in all cases (even if there's no lein project.clj)"
   [handler]
   (fn [request]
@@ -45,20 +45,20 @@
         (io/file (-> request :project :path) "profiles.clj")
         (pr-str
          {:resolve-repos
-           {:repositories (->> (:resolve repo-map)
-                               (map (fn [{:maven.repository/keys [repository-id url username secret]}]
-                                      (log/infof "add-resolve profiles.clj profile for %s with user %s and password %s"
-                                                 url
-                                                 username
-                                                 (apply str (take (count secret) (repeat 'X))))
-                                      [repository-id {:url url
-                                                      :username username
-                                                      :password secret}]))
-                               (into []))}}))
+          {:repositories (->> (:resolve repo-map)
+                              (map (fn [{:maven.repository/keys [repository-id url username secret]}]
+                                     (log/infof "add-resolve profiles.clj profile for %s with user %s and password %s"
+                                                url
+                                                username
+                                                (apply str (take (count secret) (repeat 'X))))
+                                     [repository-id {:url url
+                                                     :username username
+                                                     :password secret}]))
+                              (into []))}}))
        (<! (handler request))))))
 
 (defn get-jars
-  "copy all jars into the scan dir" 
+  "copy all jars into the scan dir"
   [project-dir target-dir]
   (go-safe
    (when (.exists project-dir)

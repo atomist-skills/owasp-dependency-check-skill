@@ -9,7 +9,7 @@
             [goog.string.format]
             [clojure.edn :as edn]))
 
-(defn add-mvn-repos-to-deps-edn 
+(defn add-mvn-repos-to-deps-edn
   "update :mvn/repos in deps.edn and $HOME/.m2/settings.xml"
   [handler]
   (fn [request]
@@ -45,7 +45,7 @@
                   (apply str)))))))
      (<? (handler request)))))
 
-(defn get-jars 
+(defn get-jars
   "copy all jars to the scan dir"
   [project-dir target-dir]
   (go-safe
@@ -56,4 +56,4 @@
          (log/error stderr)
          (throw (ex-info "failed to run `clj -Spath`" {:stderr stderr})))
        (doseq [path (s/split stdout #":")]
-         (<? (proc/aexec (gstring/format "cp %s %s" path (.getPath target-dir)))))))))E
+         (<? (proc/aexec (gstring/format "cp %s %s" path (.getPath target-dir))))))))) E
