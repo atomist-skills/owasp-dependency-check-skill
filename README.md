@@ -2,15 +2,16 @@
 
 ## TODO
 
-- [ ] only supporting deps.edn/project.clj in root of project
+-   [ ] only supporting deps.edn/project.clj in root of project
 
 ## Model
 
-Analyzers collect "evidence" that a Commit references certain package urls, or CPEs.  Indexes like the OSSINDEX, or
-NIST, are used to determine whether the project is impacted by CVEs.
+Analyzers collect "evidence" that a Commit references certain package urls, or
+CPEs. Indexes like the OSSINDEX, or NIST, are used to determine whether the
+project is impacted by CVEs.
 
-
-Here's a [picture][model] of the data that we transact during analysis of a Commit.
+Here's a [picture][model] of the data that we transact during analysis of a
+Commit.
 
 ## Docker
 
@@ -99,7 +100,8 @@ OSSINDEX vulnerabilities should be attached to the purl if there's just one.
     https://csrc.nist.gov/schema/nvd/feed/1.1/nvd_cve_feed_json_1.1.schema
 [cpe 2.3 spec]: https://cpe.mitre.org/specification/
 [matching spec]: https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir7696.pdf
-[model]: https://lucid.app/lucidchart/52ba9b78-c54b-40dc-b559-e01b97bbcb31/edit?page=VbVazIvHVe8c#
+[model]:
+    https://lucid.app/lucidchart/52ba9b78-c54b-40dc-b559-e01b97bbcb31/edit?page=VbVazIvHVe8c#
 
 ---
 
