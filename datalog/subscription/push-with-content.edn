@@ -17,6 +17,11 @@
  (get-config-value "path-not-exists" [] ?path-not-exists)
  (get-config-value "branch-filters" [] ?branch-filters)
 
+ ;; (tx-push-with-content ?branch-filters false ?path-exists ?path-not-exists ?commit)
+ ;; only enabled for Clojure
+ ;; (repo-selected? ?repo)
+ ;; (repo-language ?repo "Clojure")
+
  ;; first, tx must contain one of the things we care about, or other content indexing could trigger this
  (or-join [?commit ?path-exists ?path-not-exists]
           (and
@@ -34,10 +39,8 @@
  [?commit :git.commit/repo ?repo]
  ;; apply repo filter
  (repo-selected? ?repo)
- ;; only enabled for Clojure
- (repo-language ?repo "Clojure")
  ;; check branch filters
- [(ground ?default-only false)]
+ [(ground false) ?default-only]
  [?ref :git.ref/commit ?commit]
  (or-join [?ref ?default-only ?branch-filters]
           (and
