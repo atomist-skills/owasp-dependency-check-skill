@@ -16,7 +16,39 @@
  (get-config-value "other-files-to-index" ["project.clj" "deps.edn"] ?path-exists)
  (get-config-value "path-not-exists" [] ?path-not-exists)
  (get-config-value "branch-filters" [] ?branch-filters)
- (tx-push-with-content ?branch-filters false ?path-exists ?path-not-exists ?commit)
+
+ ;; first, tx must contain one of the things we care about, or other content indexing could trigger this
+ (or-join [?commit ?path-exists ?path-not-exists]
+          (and
+           (tx-entity-attr-value :git.commit/file ?commit ?file)
+           [?file :git.file/path ?file-path]
+           (array-contains? ?path-exists ?file-path))
+          (and
+           (tx-entity-attr-value :git.commit/not-file-paths ?commit ?file-path)
+           (array-contains? ?path-not-exists ?file-path)))
+
+ ;; if path-not-exists is empty or the commit has none of the not-contains-paths
+ (or-join [?commit ?path-not-exists]
+          [(empty? ?path-not-exists)]
+          (files-not-exist? ?commit ?path-not-exists))
  [?commit :git.commit/repo ?repo]
+ ;; apply repo filter
+ (repo-selected? ?repo)
+ ;; only enabled for Clojure
  (repo-language ?repo "Clojure")
+ ;; check branch filters
+ [(ground ?default-only false)]
+ [?ref :git.ref/commit ?commit]
+ (or-join [?ref ?default-only ?branch-filters]
+          (and
+           [(true? ?default-only)]
+           (is-default-branch? ?ref))
+          (and
+           [(false? ?default-only)]
+           [?ref :git.ref/name ?branch-name]
+           (array-contains? ?branch-filters ?branch-name))
+          (and
+           [(false? ?default-only)]
+           [(empty? ?branch-filters)]))
+ ;; get the maven capability
  (capability-configuration "atomist" "MavenRepository" ?usage ?maven-repo)]
