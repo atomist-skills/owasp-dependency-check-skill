@@ -31,8 +31,8 @@ Apache License 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apa
 | `@google-cloud/projectify`            | `2.0.1`  | Google Inc.           | [https://github.com/googleapis/nodejs-projectify](https://github.com/googleapis/nodejs-projectify)                               |
 | `@google-cloud/promisify`             | `2.0.3`  | Google Inc.           | [https://github.com/googleapis/nodejs-promisify](https://github.com/googleapis/nodejs-promisify)                                 |
 | `@google-cloud/pubsub`                | `2.10.0` | Google Inc.           | [https://github.com/googleapis/nodejs-pubsub](https://github.com/googleapis/nodejs-pubsub)                                       |
-| `@google-cloud/storage`               | `5.8.0`  | Google Inc.           | [https://github.com/googleapis/nodejs-storage](https://github.com/googleapis/nodejs-storage)                                     |
-| `@grpc/grpc-js`                       | `1.2.8`  | Google Inc.           | [https://github.com/grpc/grpc-node/tree/master/packages/grpc-js](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js) |
+| `@google-cloud/storage`               | `5.8.1`  | Google Inc.           | [https://github.com/googleapis/nodejs-storage](https://github.com/googleapis/nodejs-storage)                                     |
+| `@grpc/grpc-js`                       | `1.2.9`  | Google Inc.           | [https://github.com/grpc/grpc-node/tree/master/packages/grpc-js](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js) |
 | `@grpc/proto-loader`                  | `0.5.6`  | Google Inc.           | [https://github.com/grpc/grpc-node](https://github.com/grpc/grpc-node)                                                           |
 | `@opencensus/core`                    | `0.0.22` | Google Inc.           | [https://github.com/census-instrumentation/opencensus-node](https://github.com/census-instrumentation/opencensus-node)           |
 | `@opencensus/propagation-stackdriver` | `0.0.22` | OpenCensus Authors    | [https://github.com/census-instrumentation/opencensus-node](https://github.com/census-instrumentation/opencensus-node)           |
@@ -45,7 +45,7 @@ Apache License 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apa
 | `ecdsa-sig-formatter`                 | `1.0.11` | D2L Corporation       | [https://github.com/Brightspace/node-ecdsa-sig-formatter](https://github.com/Brightspace/node-ecdsa-sig-formatter)               |
 | `eventid`                             | `1.0.0`  | Google Inc.           | [https://github.com/google/eventid-js](https://github.com/google/eventid-js)                                                     |
 | `fast-text-encoding`                  | `1.0.3`  | Sam Thorogood         | [https://github.com/samthor/fast-text-encoding](https://github.com/samthor/fast-text-encoding)                                   |
-| `gaxios`                              | `4.1.0`  | Google, LLC           | [https://github.com/googleapis/gaxios](https://github.com/googleapis/gaxios)                                                     |
+| `gaxios`                              | `4.2.0`  | Google, LLC           | [https://github.com/googleapis/gaxios](https://github.com/googleapis/gaxios)                                                     |
 | `gcp-metadata`                        | `4.2.1`  | Stephen Sawchuk       | [https://github.com/googleapis/gcp-metadata](https://github.com/googleapis/gcp-metadata)                                         |
 | `google-auth-library`                 | `6.1.6`  | Google Inc.           | [https://github.com/googleapis/google-auth-library-nodejs](https://github.com/googleapis/google-auth-library-nodejs)             |
 | `google-auth-library`                 | `7.0.2`  | Google Inc.           | [https://github.com/googleapis/google-auth-library-nodejs](https://github.com/googleapis/google-auth-library-nodejs)             |
@@ -245,7 +245,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.19` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.21` | jim@atomist.com |            |
 
 ## Contact
 
