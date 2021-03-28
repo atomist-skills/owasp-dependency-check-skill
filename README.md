@@ -13,6 +13,46 @@ project is impacted by CVEs.
 Here's a [picture][model] of the data that we transact during analysis of a
 Commit.
 
+## Setting up DB
+
+### 1 Local DB
+
+Start with a local mysql db.
+
+```
+$:> mysql.server start
+$:> mysql -uroot -hlocalhost -p
+mysql> CREATE database dependencycheck;
+mysql> CREATE user 'dcuser'@'localhost' identified by 'xxxxxxx'
+mysql> grant all privileges on dependencycheck.* to 'dcuser'@'localhost';
+mysql> source dependencycheck/core/src/main/resources/data/initialize_mysql.sql
+```
+
+and then a local docker container pointed at this local db.  This should initialize the DB fully.
+
+```
+update-local-db.sh
+```
+
+### 2 dump all the data from the local db
+
+This is really to speed up the initialization of the remote DB.
+
+```
+mysqldump --databases dependencycheck -h localhost -u root -p --hex-blob --single-transaction --set-gtid-purged=OFF --default-character-set=utf8mb4 > dump.sql
+sed -i '' 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/g' dump.sql
+```
+
+Upload it to a bucket in the google project and then imported it to my Google Cloud
+SQL instance using the console.
+
+You'll need to have prepped the remote db first:
+
+```
+mysql --user=root --password --host=35.237.63.102 < ./dependencycheck/core/src/main/resources/data/initialize_mysql.sql
+mysql --user=root --password --host=35.237.63.102
+```
+
 ## Docker
 
 -   added `JDBC_DRIVER_PATH` and `DEPENDENCY_CHECK` (location of
@@ -25,32 +65,6 @@ docker build -t owasp-dependency-check-skill:latest -f docker/Dockerfile .
 # Shell-In to Container
 docker run -it --entrypoint /bin/sh --user root owasp-dependency-check-skill:latest
 ```
-
-## Google Mysql Instance for fast CVE lookups
-
-Can connect with mysql client using cli:
-
-```
-cd mysql
-mysql --user=root --password --host=35.237.63.102
-```
-
-After the initial load to a local mysql (not the above one), using
-dependencycheck:
-
-```
-./mysql/update-mysql.sh
-```
-
-I then took a sqldump of the local database and fixed it using sed (weird bug):
-
-```
-mysqldump --databases dependencycheck -h localhost -u root -p --hex-blob --single-transaction --set-gtid-purged=OFF --default-character-set=utf8mb4 > dump.sql
-sed -i '' 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/g' 2019-10-26-prod.sql
-```
-
-I then uploaded it to a bucket in my project and imported it to my Google Cloud
-SQL instance using the console.
 
 ## TODO: Prepare the SSL client connection
 
@@ -94,14 +108,11 @@ OSSINDEX vulnerabilities should be attached to the purl if there's just one.
 -   [base docker image][base-docker-image]
 
 [base-docker-image]: https://hub.docker.com/r/owasp/dependency-check
-[init.sql]:
-    https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
-[nvd feed]:
-    https://csrc.nist.gov/schema/nvd/feed/1.1/nvd_cve_feed_json_1.1.schema
+[init.sql]: https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
+[nvd feed]: https://csrc.nist.gov/schema/nvd/feed/1.1/nvd_cve_feed_json_1.1.schema
 [cpe 2.3 spec]: https://cpe.mitre.org/specification/
 [matching spec]: https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir7696.pdf
-[model]:
-    https://lucid.app/lucidchart/52ba9b78-c54b-40dc-b559-e01b97bbcb31/edit?page=VbVazIvHVe8c#
+[model]: https://lucid.app/lucidchart/52ba9b78-c54b-40dc-b559-e01b97bbcb31/edit?page=VbVazIvHVe8c#
 
 ---
 
