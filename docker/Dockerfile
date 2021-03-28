@@ -1,4 +1,4 @@
-FROM owasp/dependency-check:latest
+FROM owasp/dependency-check:latest@sha256:e44b1ecae45606ea39bf552efb6a3fb4d10a5e7b34f4c483de71fc4a5086cef0
 
 USER root
 ENV LEIN_VERSION=2.9.3
