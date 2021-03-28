@@ -28,7 +28,8 @@ mysql> grant all privileges on dependencycheck.* to 'dcuser'@'localhost';
 mysql> source dependencycheck/core/src/main/resources/data/initialize_mysql.sql
 ```
 
-and then a local docker container pointed at this local db.  This should initialize the DB fully.
+and then a local docker container pointed at this local db. This should
+initialize the DB fully.
 
 ```
 update-local-db.sh
@@ -43,8 +44,8 @@ mysqldump --databases dependencycheck -h localhost -u root -p --hex-blob --singl
 sed -i '' 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/g' dump.sql
 ```
 
-Upload it to a bucket in the google project and then imported it to my Google Cloud
-SQL instance using the console.
+Upload it to a bucket in the google project and then imported it to my Google
+Cloud SQL instance using the console.
 
 You'll need to have prepped the remote db first:
 
@@ -108,11 +109,14 @@ OSSINDEX vulnerabilities should be attached to the purl if there's just one.
 -   [base docker image][base-docker-image]
 
 [base-docker-image]: https://hub.docker.com/r/owasp/dependency-check
-[init.sql]: https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
-[nvd feed]: https://csrc.nist.gov/schema/nvd/feed/1.1/nvd_cve_feed_json_1.1.schema
+[init.sql]:
+    https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_mysql.sql
+[nvd feed]:
+    https://csrc.nist.gov/schema/nvd/feed/1.1/nvd_cve_feed_json_1.1.schema
 [cpe 2.3 spec]: https://cpe.mitre.org/specification/
 [matching spec]: https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir7696.pdf
-[model]: https://lucid.app/lucidchart/52ba9b78-c54b-40dc-b559-e01b97bbcb31/edit?page=VbVazIvHVe8c#
+[model]:
+    https://lucid.app/lucidchart/52ba9b78-c54b-40dc-b559-e01b97bbcb31/edit?page=VbVazIvHVe8c#
 
 ---
 
