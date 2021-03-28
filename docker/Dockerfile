@@ -1,4 +1,4 @@
-FROM owasp/dependency-check
+FROM owasp/dependency-check:latest
 
 USER root
 ENV LEIN_VERSION=2.9.3
