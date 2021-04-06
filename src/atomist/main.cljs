@@ -461,14 +461,7 @@
                 "\n"
                 "| :---  | :---   | :----    | :-- | :---  |"))))
 
-(comment
-  (enable-console-print!)
-  (println
-   (-> (io/slurp "resources/data-on-discovery.edn")
-       (edn/read-string)
-       (report))))
-
-(defn neutral-milk-party [handler]
+(defn check-run-report [handler]
   (fn [request]
     (go-safe
      (let [{:git.commit/keys [sha]} (-> request :subscription :result first first)
@@ -486,8 +479,8 @@
        (api/mw-dispatch {:on-nvd-update.edn (-> (api/finished)
                                                 (update-nvd-db))
                          :on-discovery.edn (-> (api/finished)
-                                               (neutral-milk-party)
-                                               (api/with-github-check-run :name "owasp-dependency-check")
+                                               (check-run-report)
+                                               (api/with-github-check-run :name "owasp-dependency-check-skill/scanned")
                                                (create-ref-from-event))
                          :default (-> (api/finished)
                                       (transact-vulns)
