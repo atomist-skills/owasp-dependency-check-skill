@@ -16,6 +16,7 @@
  :homepageUrl "https://github.com/atomist-skills/owasp-dependency-check-skill"
  :name "owasp-dependency-check-skill"
  :displayName "owasp dependency check skill"
+ :categories ["DEVSECOPS"]
  :description "This section supports markdown"
  :author "slimslenderslacks"
  :license "unknown"
