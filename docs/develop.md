@@ -1,5 +1,72 @@
 # `atomist/owasp-dependency-check`
 
+;; sonatype OSS Index
+;; https://ossindex.sonatype.org/component/pkg:npm/jquery@1.8.0.min
+;;  https://blog.sonatype.com/how-to-use-sonatype-oss-index-to-identify-security-vulnerabilities
+;;
+;; Common Vulnerability Scoring System
+;;  https://en.wikipedia.org/wiki/Common_Vulnerability_Scoring_System
+;;
+;; fileName, md5, sha1, sha256, description, license, evidenceCollected, packages, vulnerabilities, vulnerabilityIds,
+;; suppressedVulnerabilities, suppressedVulnerabilityIds, relatedDependencies
+;; https://github.com/jeremylong/DependencyCheck/blob/main/core/src/main/resources/data/initialize_postgres.sql
+;;
+;; dependency -> evidenceCollected -> packages
+;;   packages [id, confidence, url]
+;; isVirtual - file does not actual exist
+
+;; CPE Common Platform Enumeration (https://nvd.nist.gov/products/cpe)
+;;   produce, vendor, version
+;;   cpe:2.3:a:apache:zookeeper:*:*:*:*:*:*:*:*
+;;   cpe:/[Entry Type]:[Vendor]:[Product]:[Version]:[Revision]:…
+;;   cpe:/ part : vendor : product : version : update : edition : language
+;; CVE Common Vulnerability and Exposure
+;;    CVEs are a mapping between a vulnerability entry and a set of CPEs
+
+;; CVE and CPE together form a Vulnerability Management System (VMS)
+;;   https://www.groundai.com/project/software-vulnerability-analysis-using-cpe-and-cve/1
+;;   CVE entries without CPE entries
+;;   https://storage.googleapis.com/groundai-web-prod/media%2Fusers%2Fuser_214429%2Fproject_336952%2Fimages%2Foverview.jpg
+;; 
+;; https://nvd.nist.gov/vuln/data-feeds
+
+;; suppressions
+;;   by sha1, or filePath (regex), or packageUrl (regex)
+;;     suppress cve, or cpe, or vulnerabilityName (regex)
+;;   by cvssBelow
+
+;; bom formats
+;; https://cyclonedx.org/
+;; https://spdx.dev/
+
+;; scanInfo
+;; projectInfo
+;; dependencies 
+'(:description :isVirtual :md5 :license :fileName :evidenceCollected :sha1 :filePath :packages :sha256 :vulnerabilityIds :vulnerabilities)
+;;   evidenceCollected is used to make decisions about packages
+;;   vulnerabilityIds are really where we display confidence about how we've mapped evidence to CPEs (and subsequently
+;;   to CVES
+;;   vulnerabilityIds have :id :confidence :url
+;;   vulnerabilities are :source :name :severity :cvssv2 :cvssv3 :cwes :description :notes :references :vulnerableSoftware
+
+;; purl -> CPE mapping
+;; https://github.com/OSSIndex/vulns/issues/53
+;; 
+
+;; https://security-team.debian.org/
+;; https://security-tracker.debian.org/tracker/
+;; https://security-team.debian.org/security_tracker.html
+;; they download the CVE list twice per day and update their repo.  Their team then manually
+;; checks whether any debian packages are impacted and maintains the mapping from CVE -> debian
+;; package and may even create the CPE entry
+
+;; https://ossindex.sonatype.org/
+;; 
+
+;; https://github.com/jeremylong/DependencyCheck/blob/main/Dockerfile
+;; https://hub.docker.com/layers/clojure/library/clojure/openjdk-15-lein-alpine/images/sha256-d6a03ef67e1d15bc276c52750da971fd6725162e7d93042b69fb500caeee0aa2?context=explore 
+;; https://github.com/package-url/purl-spec
+
 ## TODO
 
 -   [ ] only supporting deps.edn/project.clj in root of project
