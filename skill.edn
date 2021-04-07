@@ -46,11 +46,6 @@
     :description "filter branches that should have owasp dependency analysis"
     :placeHolder "Dockerfile"
     :required false}}
-  {:secret
-   {:name "db-password"
-    :description "CVE Database Password"
-    :displayName "CVE Database Password"
-    :required true}}
   {:repoFilter
    {:description "The set of repositories to monitor for tags",
     :displayName "Repository Scope",
