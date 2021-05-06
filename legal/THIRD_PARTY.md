@@ -40,7 +40,7 @@ Apache License 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apa
 
 | Name                                  | Version          | Publisher             | Repository                                                                                                                       |
 | ------------------------------------- | ---------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `@atomist/skill-logging`              | `1.0.4`          | Atomist, Inc.         | [https://github.com/atomist-skills/skill-logging](https://github.com/atomist-skills/skill-logging)                               |
+| `@atomist/skill-logging`              | `1.0.5`          | Atomist, Inc.         | [https://github.com/atomist-skills/skill-logging](https://github.com/atomist-skills/skill-logging)                               |
 | `@atomist/skill`                      | `0.10.1-main.36` | Atomist, Inc.         | [https://github.com/atomist-skills/skill](https://github.com/atomist-skills/skill)                                               |
 | `@atomist/slack-messages`             | `1.2.2`          | Atomist               | [https://github.com/atomist/slack-messages](https://github.com/atomist/slack-messages)                                           |
 | `@google-cloud/common`                | `3.6.0`          | Google Inc.           | [https://github.com/googleapis/nodejs-common](https://github.com/googleapis/nodejs-common)                                       |
@@ -50,7 +50,7 @@ Apache License 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apa
 | `@google-cloud/projectify`            | `2.0.1`          | Google Inc.           | [https://github.com/googleapis/nodejs-projectify](https://github.com/googleapis/nodejs-projectify)                               |
 | `@google-cloud/promisify`             | `2.0.3`          | Google Inc.           | [https://github.com/googleapis/nodejs-promisify](https://github.com/googleapis/nodejs-promisify)                                 |
 | `@google-cloud/pubsub`                | `2.11.0`         | Google Inc.           | [https://github.com/googleapis/nodejs-pubsub](https://github.com/googleapis/nodejs-pubsub)                                       |
-| `@google-cloud/storage`               | `5.8.4`          | Google Inc.           | [https://github.com/googleapis/nodejs-storage](https://github.com/googleapis/nodejs-storage)                                     |
+| `@google-cloud/storage`               | `5.8.5`          | Google Inc.           | [https://github.com/googleapis/nodejs-storage](https://github.com/googleapis/nodejs-storage)                                     |
 | `@grpc/grpc-js`                       | `1.3.0`          | Google Inc.           | [https://github.com/grpc/grpc-node/tree/master/packages/grpc-js](https://github.com/grpc/grpc-node/tree/master/packages/grpc-js) |
 | `@grpc/proto-loader`                  | `0.6.1`          | Google Inc.           | [https://github.com/grpc/grpc-node](https://github.com/grpc/grpc-node)                                                           |
 | `@opencensus/core`                    | `0.0.22`         | Google Inc.           | [https://github.com/census-instrumentation/opencensus-node](https://github.com/census-instrumentation/opencensus-node)           |
@@ -86,7 +86,7 @@ BSD 2-Clause "Simplified" License - [https://opensource.org/licenses/BSD-2-Claus
 | `async-listener`             | `0.6.10` | Forrest L Norvell | [https://github.com/othiym23/async-listener](https://github.com/othiym23/async-listener)                                   |
 | `configstore`                | `5.0.1`  | Sindre Sorhus     | [https://github.com/yeoman/configstore](https://github.com/yeoman/configstore)                                             |
 | `continuation-local-storage` | `3.2.1`  | Forrest L Norvell | [https://github.com/othiym23/node-continuation-local-storage](https://github.com/othiym23/node-continuation-local-storage) |
-| `dotenv`                     | `8.2.0`  |                   | [https://github.com/motdotla/dotenv](https://github.com/motdotla/dotenv)                                                   |
+| `dotenv`                     | `8.6.0`  |                   | [https://github.com/motdotla/dotenv](https://github.com/motdotla/dotenv)                                                   |
 | `emitter-listener`           | `1.1.2`  | Forrest L Norvell | [https://github.com/othiym23/emitter-listener](https://github.com/othiym23/emitter-listener)                               |
 | `esprima`                    | `4.0.1`  | Ariya Hidayat     | [https://github.com/jquery/esprima](https://github.com/jquery/esprima)                                                     |
 | `http-cache-semantics`       | `4.1.0`  | Kornel Lesiński   | [https://github.com/kornelski/http-cache-semantics](https://github.com/kornelski/http-cache-semantics)                     |
@@ -130,7 +130,7 @@ Creative Commons Attribution 4.0 International - [https://creativecommons.org/li
 
 | Name           | Version        | Publisher  | Repository                                                                       |
 | -------------- | -------------- | ---------- | -------------------------------------------------------------------------------- |
-| `caniuse-lite` | `1.0.30001220` | Ben Briggs | [https://github.com/ben-eb/caniuse-lite](https://github.com/ben-eb/caniuse-lite) |
+| `caniuse-lite` | `1.0.30001223` | Ben Briggs | [https://github.com/ben-eb/caniuse-lite](https://github.com/ben-eb/caniuse-lite) |
 
 #### CC0-1.0
 
@@ -170,7 +170,7 @@ ISC License - [https://www.isc.org/downloads/software-support-policy/isc-license
 | `cliui`                     | `6.0.0`   | Ben Coe            | [https://github.com/yargs/cliui](https://github.com/yargs/cliui)                                             |
 | `cliui`                     | `7.0.4`   | Ben Coe            | [https://github.com/yargs/cliui](https://github.com/yargs/cliui)                                             |
 | `deprecation`               | `2.3.1`   |                    | [https://github.com/gr2m/deprecation](https://github.com/gr2m/deprecation)                                   |
-| `electron-to-chromium`      | `1.3.725` | Kilian Valkhof     | [https://github.com/kilian/electron-to-chromium](https://github.com/kilian/electron-to-chromium)             |
+| `electron-to-chromium`      | `1.3.727` | Kilian Valkhof     | [https://github.com/kilian/electron-to-chromium](https://github.com/kilian/electron-to-chromium)             |
 | `fastq`                     | `1.11.0`  | Matteo Collina     | [https://github.com/mcollina/fastq](https://github.com/mcollina/fastq)                                       |
 | `fs.realpath`               | `1.0.0`   | Isaac Z. Schlueter | [https://github.com/isaacs/fs.realpath](https://github.com/isaacs/fs.realpath)                               |
 | `get-caller-file`           | `2.0.5`   | Stefan Penner      | [https://github.com/stefanpenner/get-caller-file](https://github.com/stefanpenner/get-caller-file)           |
@@ -343,7 +343,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `@types/lodash`                                      | `4.14.168`     |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/long`                                        | `4.0.1`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/node-fetch`                                  | `2.5.10`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
-| `@types/node`                                        | `15.0.1`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
+| `@types/node`                                        | `15.0.2`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/parse-json`                                  | `4.0.0`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/pluralize`                                   | `0.0.29`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/retry`                                       | `0.12.0`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
@@ -524,11 +524,11 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `inquirer`                                           | `7.3.3`        | Simon Boudrias                 | [https://github.com/SBoudrias/Inquirer.js](https://github.com/SBoudrias/Inquirer.js)                                                                                                                 |
 | `is-absolute`                                        | `1.0.0`        | Jon Schlinkert                 | [https://github.com/jonschlinkert/is-absolute](https://github.com/jonschlinkert/is-absolute)                                                                                                         |
 | `is-arrayish`                                        | `0.2.1`        | Qix                            | [https://github.com/qix-/node-is-arrayish](https://github.com/qix-/node-is-arrayish)                                                                                                                 |
-| `is-bigint`                                          | `1.0.1`        | Jordan Harband                 | [https://github.com/ljharb/is-bigint](https://github.com/ljharb/is-bigint)                                                                                                                           |
+| `is-bigint`                                          | `1.0.2`        | Jordan Harband                 | [https://github.com/inspect-js/is-bigint](https://github.com/inspect-js/is-bigint)                                                                                                                   |
 | `is-binary-path`                                     | `2.1.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/is-binary-path](https://github.com/sindresorhus/is-binary-path)                                                                                                     |
 | `is-boolean-object`                                  | `1.1.0`        | Jordan Harband                 | [https://github.com/ljharb/is-boolean-object](https://github.com/ljharb/is-boolean-object)                                                                                                           |
 | `is-callable`                                        | `1.2.3`        | Jordan Harband                 | [https://github.com/ljharb/is-callable](https://github.com/ljharb/is-callable)                                                                                                                       |
-| `is-date-object`                                     | `1.0.2`        | Jordan Harband                 | [https://github.com/ljharb/is-date-object](https://github.com/ljharb/is-date-object)                                                                                                                 |
+| `is-date-object`                                     | `1.0.3`        | Jordan Harband                 | [https://github.com/inspect-js/is-date-object](https://github.com/inspect-js/is-date-object)                                                                                                         |
 | `is-extglob`                                         | `2.1.1`        | Jon Schlinkert                 | [https://github.com/jonschlinkert/is-extglob](https://github.com/jonschlinkert/is-extglob)                                                                                                           |
 | `is-fullwidth-code-point`                            | `1.0.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/is-fullwidth-code-point](https://github.com/sindresorhus/is-fullwidth-code-point)                                                                                   |
 | `is-fullwidth-code-point`                            | `2.0.0`        | Sindre Sorhus                  | [https://github.com/sindresorhus/is-fullwidth-code-point](https://github.com/sindresorhus/is-fullwidth-code-point)                                                                                   |
@@ -826,7 +826,7 @@ Python License 2.0 - [https://opensource.org/licenses/Python-2.0](https://openso
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.55` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.56` | jim@atomist.com |            |
 
 ## Contact
 
