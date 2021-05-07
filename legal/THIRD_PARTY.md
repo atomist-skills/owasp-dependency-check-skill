@@ -294,9 +294,9 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `@graphql-tools/prisma-loader`                       | `6.3.0`        | Dotan Simha                    | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
 | `@graphql-tools/relay-operation-optimizer`           | `6.3.0`        | Laurin Quast                   | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
 | `@graphql-tools/schema`                              | `7.1.5`        |                                | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
-| `@graphql-tools/url-loader`                          | `6.10.0`       | Dotan Simha                    | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
+| `@graphql-tools/url-loader`                          | `6.10.1`       | Dotan Simha                    | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
 | `@graphql-tools/utils`                               | `6.2.4`        | Dotan Simha                    | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
-| `@graphql-tools/utils`                               | `7.9.0`        | Dotan Simha                    | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
+| `@graphql-tools/utils`                               | `7.9.1`        | Dotan Simha                    | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
 | `@graphql-tools/wrap`                                | `7.0.8`        |                                | [https://github.com/ardatan/graphql-tools](https://github.com/ardatan/graphql-tools)                                                                                                                 |
 | `@microsoft/fetch-event-source`                      | `2.0.1`        | Microsoft                      | [https://github.com/Azure/fetch-event-source](https://github.com/Azure/fetch-event-source)                                                                                                           |
 | `@nodelib/fs.scandir`                                | `2.1.4`        |                                | [https://github.com/nodelib/nodelib/tree/master/packages/fs/fs.scandir](https://github.com/nodelib/nodelib/tree/master/packages/fs/fs.scandir)                                                       |
@@ -826,7 +826,7 @@ Python License 2.0 - [https://opensource.org/licenses/Python-2.0](https://openso
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.56` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.57` | jim@atomist.com |            |
 
 ## Contact
 
