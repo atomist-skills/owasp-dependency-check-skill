@@ -1,7 +1,6 @@
 (ns atomist.vulns-test
   (:require [cljs.pprint :refer [pprint]]
             [atomist.main :refer [transact-vulns is-cve?]]
-            [atomist.cljs-log :as log]
             [cljs-node-io.core :as io]
             [atomist.json :as json]
             [clojure.edn :as edn]

@@ -281,6 +281,12 @@
                 :atomist/status {:code 1
                                  :reason (gstring/format "Scan failed:  %s" (.-message ex))}))))))
 
+(defn wrap-skippable [handler]
+  (fn [request]
+    (go-safe
+     (if (-> request :atomist/scannable :atomist/skipped)
+       request
+       (<! (handler request))))))
 
 (defn scan-all [handler scan-handler]
   (fn [{{data :data} :subscription
@@ -298,12 +304,12 @@
                             (map (fn [{:git.file/keys [path] :as f}]
                                    (go-safe
                                     (<!
-                                     (scan-handler
+                                     ((wrap-skippable scan-handler)
                                       (assoc
                                        request
                                        :atomist/file-ref "$project-file"
                                        :atomist/file
-                                       (assoc f 
+                                       (assoc f
                                               :schema/entity "$project-file"
                                               :schema/entity-type :git.commit/file)
                                        :atomist/org (:git.repo/org repo)
@@ -316,15 +322,16 @@
                      data)
                     (async/merge)
                     (async/reduce conj [])))]
-       (<?
-        (handler
-         (assoc
-          request
-          :atomist/status
-          {:code (if (some #(instance? js/Error %) scan-report) 1 0)
-           :reason (gstring/format "scanned %d projects - %s" (count scan-report) scan-report)})))))))
-
-
+       (let [real-scan-reports
+             (->> scan-report
+                  (filter (complement #(-> % :atomist/scannable :atomist/skipped))))]
+         (<?
+          (handler
+           (assoc
+            request
+            :atomist/status
+            {:code (if (some #(instance? js/Error %) real-scan-reports) 1 0)
+             :reason (gstring/format "scanned %d projects - %s" (count real-scan-reports) real-scan-reports)}))))))))
 
 (defn update-nvd-db [handler]
   (fn [request]

@@ -1,12 +1,14 @@
 # hadolint ignore=DL3007
 FROM owasp/dependency-check:latest@sha256:4febd956318fc5e995575c952888ce19e1d83dba91826ba5dd796c23a12f7ffd
 
+USER root
+
 ENV LEIN_VERSION=2.9.3
 ENV LEIN_INSTALL=/usr/local/bin/
 ENV LEIN_ROOT=1
 ENV CLOJURE_VERSION=1.10.1.462
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
     apk add --update --no-cache ca-certificates bash tar openssl gnupg curl nodejs npm && \
@@ -46,6 +48,8 @@ RUN npm run build \
 
 ENV JDBC_DRIVER_PATH=/root/.m2/repository/mysql/mysql-connector-java/8.0.21/mysql-connector-java-8.0.21.jar
 ENV DEPENDENCY_CHECK=/usr/share/dependency-check/bin/dependency-check.sh
+
+USER dependencycheck
 
 ENTRYPOINT [ "node" ]
 CMD [ "index.js" ]

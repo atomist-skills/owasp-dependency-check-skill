@@ -1,4 +1,6 @@
-(ns atomist.project)
+(ns atomist.project
+  (:require [cljs.core.async :refer-macros [go]])
+  )
 
 (set! *warn-on-infer* false)
 
@@ -9,3 +11,9 @@
     (= "deps.edn" (.getName f)) :deps.edn))
 
 (defmulti expand-java-project f->type)
+
+(defmethod expand-java-project :default
+  [_ _]
+  (go
+    {:atomist/skipped true}))
+

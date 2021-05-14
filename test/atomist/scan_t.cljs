@@ -2,6 +2,8 @@
   (:require [cljs.core.async :refer [<!] :refer-macros [go]]
             [atomist.main :refer [scan-all]]
             [atomist.async :refer-macros [go-safe]]
+            [goog.string :as gstring]
+            [goog.string.format]
             [cljs.pprint :refer [pprint]]
             [cljs.test :refer-macros [deftest is async]]
             [cljs-node-io.proc :as proc]
@@ -14,13 +16,41 @@
   (go (let [[_ stdout _] (<! (proc/aexec command))]
          (count (s/split stdout "\n")))))
 
+(deftest unscannable-tests
+  (async
+   done
+   (go
+     (<! ((scan-all
+           #(go-safe
+             (println "back " %)
+             (is (= 0 (-> % :atomist/status :code)))
+             (is (s/starts-with? (-> % :atomist/status :reason) "scanned 0 projects"))
+             %)
+           #(go-safe
+             (println "scan " %)
+             %))
+          {:subscription {:data [[{:git.commit/file []}]]}
+           :project {:path "/Users/slim/repo/demo-spring"}}))
+     (<! ((scan-all
+           #(go-safe
+             (println "back " %)
+             (is (= 0 (-> % :atomist/status :code))) %)
+           #(go-safe
+             (println "scan " %)
+             %))
+          {:subscription {:data [[{:git.commit/file [{:git.file/path "unscannable"}]}]]}
+           :project {:path "/Users/slim/repo/demo-spring"}}))
+     (done))))
+
 (deftest scannable-tests
   (async
    done
    (go
      (<!
       ((scan-all
-        #(go-safe %)
+        #(go-safe 
+           (is (s/starts-with? (-> % :atomist/status :reason) (gstring/format "scanned %d projects" 1)))
+           %)
         #(go-safe
           (pprint (:atomist/scannable %))
           (is (not (instance? js/Error (:atomist/scannable %))))
