@@ -46,6 +46,18 @@
     :description "filter branches that should have owasp dependency analysis"
     :placeHolder "Dockerfile"
     :required false}}
+  {:boolean
+   {:name "add-check"
+    :displayName "create checks"
+    :description "Toggle CheckRun creation"
+    :required true
+    :defaultValue false}
+   }
+  {:schedule
+   {:name "schedule"
+    :displayName "NVD update frequency"
+    :defaultValue "0 */3 * * *"
+    :required false}}
   {:repoFilter
    {:description "The set of repositories to monitor for tags",
     :displayName "Repository Scope",

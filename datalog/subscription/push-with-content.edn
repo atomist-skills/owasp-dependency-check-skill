@@ -1,11 +1,17 @@
 [:find
  (pull ?commit [:git.commit/sha
-                {:git.commit/repo [:git.repo/source-id
-                                   :git.repo/name
-                                   :git.provider/url
-                                   {:git.repo/org [:github.org/installation-token
-                                                   :git.org/name
-                                                   :git.provider/url]}]}])
+                {:git.commit/file
+                 [:git.file/path
+                  :git.file/sha]}
+                {:git.commit/repo
+                 [:git.repo/source-id
+                  :git.repo/name
+                  :git.provider/url
+                  {:git.repo/org
+                   [:github.org/installation-token
+                    :git.org/source-id
+                    :git.org/name
+                    :git.provider/url]}]}])
  (pull ?maven-repo [:maven.repository/url
                     :maven.repository/secret
                     :maven.repository/username
@@ -13,7 +19,7 @@
  ?usage
  :in $ $before-db %
  :where
- (get-config-value "other-files-to-index" ["project.clj" "deps.edn"] ?path-exists)
+ (get-config-value "other-files-to-index" ["project.clj" "deps.edn" "pom.xml"] ?path-exists)
  (get-config-value "path-not-exists" [] ?path-not-exists)
  (get-config-value "branch-filters" [] ?branch-filters)
 

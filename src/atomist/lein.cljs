@@ -20,7 +20,10 @@
             [clojure.string :as str]
             [atomist.cljs-log :as log]
             [goog.string :as gstring]
+            [atomist.project :refer [expand-java-project]]
             [goog.string.format]))
+
+(set! *warn-on-infer* false)
 
 (defn add-lein-profiles
   "add the lein profiles.clj in all cases (even if there's no lein project.clj)"
@@ -40,22 +43,21 @@
                   (->> (:resolve repo-map)
                        (map #(gstring/format "%s - %s" (:maven.repository/repository-id %) (:maven.repository/url %)))
                        (str/join ", ")))
-
-       (io/spit
-        (io/file (-> request :project :path) "profiles.clj")
-        (pr-str
-         {:resolve-repos
-          {:repositories (->> (:resolve repo-map)
-                              (map (fn [{:maven.repository/keys [repository-id url username secret]}]
-                                     (log/infof "add-resolve profiles.clj profile for %s with user %s and password %s"
-                                                url
-                                                username
-                                                (apply str (take (count secret) (repeat 'X))))
-                                     [repository-id {:url url
-                                                     :username username
-                                                     :password secret}]))
-                              (into []))}}))
-       (<! (handler request))))))
+       (<? (handler (merge
+                     request
+                     (when (seq (:resolve repo-map))
+                       {:atomist/lein-profiles
+                        {:resolve-repos
+                         {:repositories (->> (:resolve repo-map)
+                                             (map (fn [{:maven.repository/keys [repository-id url username secret]}]
+                                                    (log/infof "add-resolve profiles.clj profile for %s with user %s and password %s"
+                                                               url
+                                                               username
+                                                               (apply str (take (count secret) (repeat 'X))))
+                                                    [repository-id {:url url
+                                                                    :username username
+                                                                    :password secret}]))
+                                             (into []))}}}))))))))
 
 (defn get-jars
   "copy all jars into the scan dir"
@@ -70,6 +72,18 @@
          (throw (ex-info "failed to run `lein cp`" {:stderr stderr})))
        (doseq [path (str/split stdout #":")]
          (<? (proc/aexec (gstring/format "cp %s %s" path (.getPath target-dir)))))))))
+
+(defmethod expand-java-project :leiningen
+  [{profiles :atomist/lein-profiles} f]
+  (go-safe
+   (let [scan-dir (io/file (.getParentFile f) "to-scan")]
+     (when profiles
+       (log/info "create local profiles " profiles)
+       (io/spit (io/file (.getParentFile f) "profiles.clj") (pr-str profiles)))
+     (.mkdirs scan-dir)
+     (<? (get-jars (.getParentFile f) scan-dir))
+     {:project-file f
+      :path scan-dir})))
 
 (comment
   (go

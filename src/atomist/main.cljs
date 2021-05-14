@@ -1,5 +1,3 @@
-;; Copyright © 2021 Atomist, Inc.
-;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
 ;; You may obtain a copy of the License at
@@ -16,7 +14,7 @@
   (:require [atomist.api :as api]
             [atomist.lein :as lein]
             [atomist.clojure :as clojure]
-            [cljs.pprint :refer [pprint]]
+            [atomist.maven]
             [cljs.core.async :refer [<! >!] :refer-macros [go] :as async]
             [atomist.async :refer-macros [go-safe <?]]
             [goog.string.format]
@@ -26,20 +24,24 @@
             [atomist.cljs-log :as log]
             [atomist.github]
             [atomist.container :as container]
-            [atomist.local-runner :as lr]
+            [atomist.project :refer [expand-java-project]]
             [cljs-node-io.core :as io]
             [cljs-node-io.proc :as proc]
-            [atomist.json :as json]
-            [clojure.edn :as edn]))
+            [atomist.json :as json]))
+
+(set! *warn-on-infer* false)
 
 (defn create-ref-from-event
   [handler]
   (fn [request]
     (go-safe
      (let [{:git.commit/keys [repo sha]} (-> request :subscription :result first first)]
-       (<? (handler (assoc request :ref {:repo (:git.repo/name repo)
-                                         :owner (-> repo :git.repo/org :git.org/name)
-                                         :sha sha}
+       (<? (handler (assoc request
+                           :ref {:repo (:git.repo/name repo)
+                                 :repo-id (:git.repo/source-id repo)
+                                 :owner (-> repo :git.repo/org :git.org/name)
+                                 :owner-id (-> repo :git.repo/org :git.org/source-id)
+                                 :sha sha}
                            :token (-> repo :git.repo/org :github.org/installation-token))))))))
 
 (defn prn-matching-software [{{:keys [id versionStartIncluding versionEndIncluding versionStartExcluding versionEndExcluding]} :software}]
@@ -123,7 +125,7 @@
 ;; case 7 - 1 package, n CPEs (different confidence, no CVEs (transact)
 ;; case 8 - 1 package, n CPEs, n CVES (***) jetty-server
 ;; case 9 - 1 package, 1 CPE, 1 CVE but SHADED - (*** humio-sender shades two libraries)
-(defn transact-dependency [request org repo commit {:keys [fileName license sha256 packages vulnerabilityIds vulnerabilities]}]
+(defn transact-dependency [{:atomist/keys [file-ref file] :as request} org repo commit {:keys [fileName license sha256 packages vulnerabilityIds vulnerabilities]}]
   (go-safe
    (let [commit-ref "$commit"
          cpes (->> (seq vulnerabilityIds)
@@ -137,6 +139,7 @@
                                       (when url {:vulnerability.cpe/search-url url}))
                                      {:schema/entity-type :package/evidence
                                       :schema/entity cpe-evidence
+                                      :package.evidence/project-file file-ref
                                       :package.evidence/commit commit-ref
                                       :package.evidence/dependency fileName
                                       :package.evidence/cpe cpe
@@ -153,6 +156,7 @@
                                        :package.url/search-url url}
                                       {:schema/entity-type :package/evidence
                                        :schema/entity package-evidence
+                                       :package.evidence/project-file file-ref
                                        :package.evidence/commit commit-ref
                                        :package.evidence/dependency fileName
                                        :package.evidence/purl purl
@@ -199,20 +203,21 @@
                   :schema/entity commit-ref
                   :git.provider/url (:git.provider/url org)
                   :git.commit/sha (:git.commit/sha commit)
-                  :git.commit/repo "$repo"}])
+                  :git.commit/repo "$repo"}
+                 file])
                (into [])))))))
 
 (defn transact-vulns [handler]
-  (fn [{:as request :atomist/keys [org repo commit dependency-report]}]
+  (fn [{:as request {:keys [project-file path]} :atomist/scannable :atomist/keys [org repo commit dependency-report]}]
     (go-safe
      (api/trace "transact-vulns")
-     (<?  (->>
-           dependency-report
-           :dependencies
-           (filter #(or (seq (:vulnerabilityIds %)) (seq (:packages %))))
-           (map (partial transact-dependency request org repo commit))
-           (async/merge)
-           (async/reduce conj [])))
+     (<? (->>
+          dependency-report
+          :dependencies
+          (filter #(or (seq (:vulnerabilityIds %)) (seq (:packages %))))
+          (map (partial transact-dependency request org repo commit))
+          (async/merge)
+          (async/reduce conj [])))
      (<? (api/transact request [{:schema/entity-type :git/repo
                                  :schema/entity "$repo"
                                  :git.provider/url (:git.provider/url org)
@@ -230,43 +235,6 @@
                          :atomist/status
                          {:code 0
                           :reason "owasp dependency scan complete and discoverable"}))))))
-
-(defn do-nothing [& args] (go true))
-(defn js-obj->entities [& args]
-  (go (-> args
-          first
-          (js->clj :keywordize-keys true)
-          :entities
-          (edn/read-string))))
-(defn print-all [& args] (go
-                           (let [entities (<! (apply js-obj->entities args))]
-                             (when (some is-cve? entities)
-                               (cljs.pprint/pprint entities)))
-                           true))
-
-(comment
-  (go
-    (<! ((transact-vulns #(go (log/infof "end with %s" (:atomist/status %)) %))
-         {:correlation_id "corrid"
-          :sendreponse print-all
-          :atomist/org {:git.provider/url "url"}
-          :atomist/repo {:git.repo/source-id "source-id"}
-          :atomist/commit {:git.commit/sha "sha"}
-          :atomist/dependency-report (json/->obj (io/slurp "dependency-check-report.json"))})))
-  (enable-console-print!)
-  (pprint
-   (-> (io/slurp "dependency-check-report.json")
-       (json/->obj)
-       :dependencies
-       (as-> deps (->> deps
-                       (map (fn [dep]
-                              (select-keys dep [:vulnerabilities :vulnerabilityIds :packages :fileName])))
-                       (map (fn [dep]
-                              (-> dep
-                                  (merge
-                                   (when (seq (:vulnerabilities dep))
-                                     {:cve-count (count (:vulnerabilities dep))}))
-                                  (dissoc :vulnerabilities)))) (map #(->> %)))))))
 
 (defn spawn [command args]
   (go-safe
@@ -288,44 +256,75 @@
      (<! c))))
 
 (defn run-scan [handler]
-  (fn [request]
+  (fn [{{:keys [project-file path]} :atomist/scannable :atomist/keys [repo] :as request}]
     (go-safe
-     (api/trace "run-scan")
+     (api/trace (str "run-scan on " project-file " for project " path))
      (try
-       (let [project-dir (io/file (-> request :project :path))
-             scan-dir (io/file "scan-dir")
-             commit (-> request :subscription :result first first)
-             repo (:git.commit/repo commit)
-             org (:git.repo/org repo)
-             deps-edn (io/file project-dir "deps.edn")
-             project-clj (io/file project-dir "project.clj")]
-         (.mkdirs scan-dir)
-         (when (.exists project-clj)
-           (<? (lein/get-jars project-dir scan-dir)))
-         (when (.exists deps-edn)
-           (<? (clojure/get-jars project-dir scan-dir)))
-         (let [command (.. js/process -env -DEPENDENCY_CHECK)
-               args ["--project" (:git.repo/name repo)
-                     "--scan" (.getPath scan-dir)
-                     "--format" "JSON"
-                     "--noupdate"
-                     "--connectionString" "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\""
-                     "--dbDriverName" "com.mysql.cj.jdbc.Driver"
-                     "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH)
-                     "--dbPassword" (:nvd-mysql-password request)
-                     "--dbUser" "root"]]
-           (<? (spawn command args)))
-         (<? (handler (assoc request
-                             :atomist/dependency-report (-> (io/slurp "dependency-check-report.json")
-                                                            (json/->obj))
-                             :atomist/org org
-                             :atomist/repo repo
-                             :atomist/commit commit))))
+       (let [command (.. js/process -env -DEPENDENCY_CHECK)
+             args ["--project" (gstring/format "%s://%s" (-> repo :git.repo/name) (.getPath :project-file))
+                   "--scan" (.getPath path)
+                   "--format" "JSON"
+                   "--noupdate"
+                   "--connectionString" "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\""
+                   "--dbDriverName" "com.mysql.cj.jdbc.Driver"
+                   "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH)
+                   "--dbPassword" (:nvd-mysql-password request)
+                   "--dbUser" "root"]]
+         (<? (spawn command args)))
+       (<? (handler (assoc request
+                           :atomist/dependency-report
+                           (-> (io/slurp (io/file (.getParentFile project-file) "dependency-check-report.json"))
+                               (json/->obj)))))
        (catch :default ex
          (log/errorf ex "Error %s\n%s" (.-message ex) (ex-data ex))
          (assoc request
                 :atomist/status {:code 1
                                  :reason (gstring/format "Scan failed:  %s" (.-message ex))}))))))
+
+
+(defn scan-all [handler scan-handler]
+  (fn [{{data :data} :subscription
+        {dir :path} :project
+        :as request}]
+    (api/trace "scan-all")
+    (go-safe
+     (let [basedir (io/file dir)
+           scan-report
+           (<? (->> (mapcat
+                     (fn [[{files :git.commit/file
+                            repo :git.commit/repo
+                            :as commit} _]]
+                       (->> files
+                            (map (fn [{:git.file/keys [path] :as f}]
+                                   (go-safe
+                                    (<!
+                                     (scan-handler
+                                      (assoc
+                                       request
+                                       :atomist/file-ref "$project-file"
+                                       :atomist/file
+                                       (assoc f 
+                                              :schema/entity "$project-file"
+                                              :schema/entity-type :git.commit/file)
+                                       :atomist/org (:git.repo/org repo)
+                                       :atomist/repo repo
+                                       :atomist/commit commit
+                                       :atomist/scannable
+                                       (<!
+                                        (expand-java-project request (io/file basedir path)))))))))))
+
+                     data)
+                    (async/merge)
+                    (async/reduce conj [])))]
+       (<?
+        (handler
+         (assoc
+          request
+          :atomist/status
+          {:code (if (some #(instance? js/Error %) scan-report) 1 0)
+           :reason (gstring/format "scanned %d projects - %s" (count scan-report) scan-report)})))))))
+
+
 
 (defn update-nvd-db [handler]
   (fn [request]
@@ -414,15 +413,28 @@
                          :on-discovery.edn (-> (api/finished)
                                                (check-run-report)
                                                (api/with-github-check-run :name "owasp-dependency-check-skill/scanned")
-                                               (create-ref-from-event))
-                         :default (-> (api/finished)
-                                      (transact-vulns)
-                                      (run-scan)
-                                      (lein/add-lein-profiles)
-                                      (clojure/add-mvn-repos-to-deps-edn)
-                                      (api/clone-ref)
-                                      #_(api/with-github-check-run :name "owasp-dependency-check")
-                                      (create-ref-from-event))})
+                                               (create-ref-from-event)
+                                               ((fn [handler]
+                                                  (fn [request]
+                                                    (go-safe
+                                                     (if (:add-check request)
+                                                       (<? (handler request))
+                                                       (assoc request
+                                                              :atomist/status
+                                                              {:code 0 :reason "discovery check disabled"})))))))
+                         :push-with-content.edn (-> (api/finished)
+                                                    (scan-all (-> #(go %)
+                                                                  (transact-vulns)
+                                                                  (run-scan)))
+                                                    (lein/add-lein-profiles)
+                                                    (clojure/add-mvn-repos-to-deps-edn)
+                                                    (api/clone-ref)
+                                                    (create-ref-from-event))
+                         :default (fn [request]
+                                    (go (assoc request 
+                                               :atomist/summary 
+                                               {:code 1 
+                                                :reason "unknown subscription"})))})
        (api/add-skill-config)
        (api/log-event)
        (api/status)

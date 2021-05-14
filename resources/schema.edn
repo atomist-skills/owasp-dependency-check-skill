@@ -26,6 +26,8 @@
   :package/evidence {:db.entity/attrs [:package.evidence/commit :package.evidence/dependency]}
   :package.evidence/commit {:db/valueType :db.type/ref
                             :db/cardinality :db.cardinality/one}
+  :package.evidence/project-file {:db/valueType :db.type/ref
+                                  :db/cardinality :db.cardinality/one}
   :package.evidence/dependency {:db/valueType :db.type/ref
                                 :db/cardinality :db.cardinality/one}
   :package.evidence/source {:db/valueType :db.type/ref
