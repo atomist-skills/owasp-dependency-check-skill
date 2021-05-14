@@ -8,10 +8,10 @@ ENV LEIN_INSTALL=/usr/local/bin/
 ENV LEIN_ROOT=1
 ENV CLOJURE_VERSION=1.10.1.462
 
-SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 RUN apk update && \
-    apk add --update --no-cache ca-certificates bash tar openssl gnupg curl nodejs npm && \
+    apk add --update --no-cache ca-certificates bash curl tar openssl gnupg nodejs npm && \
     mkdir -p $LEIN_INSTALL && \
     wget -q https://raw.githubusercontent.com/technomancy/leiningen/$LEIN_VERSION/bin/lein-pkg && \
     echo "Comparing lein-pkg checksum ..." && \
@@ -22,10 +22,10 @@ RUN apk update && \
     wget -q https://github.com/technomancy/leiningen/releases/download/$LEIN_VERSION/leiningen-$LEIN_VERSION-standalone.zip && \
     mkdir -p /usr/share/java && \
     mv leiningen-$LEIN_VERSION-standalone.zip /usr/share/java/leiningen-$LEIN_VERSION-standalone.jar && \
-    apk del ca-certificates tar openssl gnupg && \
     wget -q https://download.clojure.org/install/linux-install-$CLOJURE_VERSION.sh && \
     chmod +x linux-install-$CLOJURE_VERSION.sh && \
-    ./linux-install-$CLOJURE_VERSION.sh
+    ./linux-install-$CLOJURE_VERSION.sh && \
+    apk del ca-certificates tar openssl gnupg curl
 
 WORKDIR /tmp
 

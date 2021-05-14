@@ -56,6 +56,7 @@
   {:schedule
    {:name "schedule"
     :displayName "NVD update frequency"
+    :description "Pull down NVD mirror updates every 3 hours"
     :defaultValue "0 */3 * * *"
     :required false}}
   {:repoFilter
