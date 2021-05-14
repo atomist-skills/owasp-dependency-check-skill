@@ -8,7 +8,7 @@ ENV LEIN_INSTALL=/usr/local/bin/
 ENV LEIN_ROOT=1
 ENV CLOJURE_VERSION=1.10.1.462
 
-SHELL ["sh", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN apk update && \
     apk add --update --no-cache ca-certificates bash tar openssl gnupg curl nodejs npm && \
