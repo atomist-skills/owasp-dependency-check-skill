@@ -54,10 +54,6 @@ debian ;; package and may even create the CPE entry
 https://hub.docker.com/layers/clojure/library/clojure/openjdk-15-lein-alpine/images/sha256-d6a03ef67e1d15bc276c52750da971fd6725162e7d93042b69fb500caeee0aa2?context=explore
 ;; https://github.com/package-url/purl-spec
 
-## TODO
-
--   [ ] only supporting deps.edn/project.clj in root of project
-
 ## Model
 
 Analyzers collect "evidence" that a Commit references certain package urls, or
@@ -77,9 +73,13 @@ Start with a local mysql db.
 $:> mysql.server start
 $:> mysql -uroot -hlocalhost -p
 mysql> CREATE database dependencycheck;
-mysql> CREATE user 'dcuser'@'localhost' identified by 'xxxxxxx'
-mysql> grant all privileges on dependencycheck.* to 'dcuser'@'localhost';
+mysql> select user from mysql.user;
+;; mysql> CREATE USER 'dcuser'@'localhost' identified by 'xxxxxxx';
+mysql> CREATE USER 'dcuser';
+mysql> ALTER USER 'dcuser' identified by 'xxxxxxxx';
 mysql> source dependencycheck/core/src/main/resources/data/initialize_mysql.sql
+mysql> grant all privileges on dependencycheck.* to 'dcuser';
+mysql> flush privileges;
 ```
 
 and then a local docker container pointed at this local db. This should

@@ -221,7 +221,7 @@
                (into [])))))))
 
 (defn transact-vulns [handler]
-  (fn [{:as request {:keys [project-file path]} :atomist/scannable :atomist/keys [org repo commit dependency-report]}]
+  (fn [{:as request {:keys [project-file path]} :atomist/scannable :atomist/keys [org repo commit dependency-report file file-ref]}]
     (go-safe
      (api/trace "transact-vulns")
      (<? (->>
@@ -231,7 +231,8 @@
           (map (partial transact-dependency request org repo commit))
           (async/merge)
           (async/reduce conj [])))
-     (<? (api/transact request [{:schema/entity-type :git/repo
+     (<? (api/transact request [file
+                                {:schema/entity-type :git/repo
                                  :schema/entity "$repo"
                                  :git.provider/url (:git.provider/url org)
                                  :git.repo/source-id (:git.repo/source-id repo)}
@@ -242,6 +243,7 @@
                                  :git.commit/repo "$repo"}
                                 {:schema/entity-type :dependency.analysis/discovery
                                  :dependency.analysis.discovery/commit "$commit"
+                                 :dependency.analysis.discovery/project-file file-ref
                                  :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER
                                  :dependency.analysis.discovery/status :dependency.analysis.discovery.status/COMPLETE}]))
      (<? (handler (assoc request

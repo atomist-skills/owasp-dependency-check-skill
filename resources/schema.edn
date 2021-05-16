@@ -57,6 +57,8 @@
                                          :db/cardinality :db.cardinality/one}
   :dependency.analysis.discovery/status {:db/valueType :db.type/ref
                                          :db/cardinality :db.cardinality/one}
+  :dependency.analysis.discovery/project-file {:db/valueType :db.type/ref
+                                               :db/cardinality :db.cardinality/one}
   :dependency.analysis.discovery.status/COMPLETE {}
   :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER {}
   ;; -------------
