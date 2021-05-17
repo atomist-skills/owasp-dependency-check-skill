@@ -53,7 +53,7 @@
                          secret)))
                  (apply str)))]
        (when (seq (:resolve repo-map))
-         (.mkdirs (io/file ".m2" (.. js/process -env -HOME)))
+         (.mkdirs (io/file (.. js/process -env -HOME) ".m2"))
          (io/spit
           (io/file (gstring/format "%s/.m2/settings.xml" (.. js/process -env -HOME)))
           settings-xml))
