@@ -251,11 +251,11 @@
                          {:code 0
                           :reason "owasp dependency scan complete and discoverable"}))))))
 
-(defn spawn [command args]
+(defn spawn [command args cwd]
   (go-safe
    (log/info "args " args)
    (let [c (async/chan)
-         p (proc/spawn command args {})]
+         p (proc/spawn command args {:cwd (.getPath cwd)})]
      (.on (.-stderr p) "data" (fn [d] (log/error d)))
      (.on (.-stdout p) "data" (fn [d] (log/info d)))
      (.on p "close" (fn [code]
@@ -275,7 +275,8 @@
     (go-safe
      (api/trace (str "run-scan on " project-file " for project " path))
      (try
-       (let [command (.. js/process -env -DEPENDENCY_CHECK)
+       (let [project-basedir (.getParentFile project-file)
+             command (.. js/process -env -DEPENDENCY_CHECK)
              args ["--project" (gstring/format "%s://%s" (-> repo :git.repo/name) (.getPath ^:js project-file))
                    "--scan" (.getPath ^:js path)
                    "--format" "JSON"
@@ -284,12 +285,13 @@
                    "--dbDriverName" "com.mysql.cj.jdbc.Driver"
                    "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH)
                    "--dbPassword" (:nvd-mysql-password request)
+                   ;; TODO switch to the dcuser
                    "--dbUser" "root"]]
-         (<? (spawn command args)))
-       (<? (handler (assoc request
-                           :atomist/dependency-report
-                           (-> (io/slurp (io/file (.getParentFile project-file) "dependency-check-report.json"))
-                               (json/->obj)))))
+         (<? (spawn command args project-basedir))
+         (<? (handler (assoc request
+                             :atomist/dependency-report
+                             (-> (io/slurp (io/file project-basedir "dependency-check-report.json"))
+                                 (json/->obj))))))
        (catch :default ex
          (log/errorf ex "Error %s\n%s" (.-message ex) (dissoc (ex-data ex) :args))
          (assoc request

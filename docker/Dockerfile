@@ -36,6 +36,7 @@ ENV JAVA_HOME=/opt/jdk
 RUN echo '(defproject dummy "" :dependencies [[org.clojure/clojure "1.10.1"]])' > project.clj && lein deps && rm project.clj
 
 WORKDIR /usr/src/app
+# TODO run as USER dependencycheck
 
 COPY package*.json /usr/src/app/
 RUN npm ci \
