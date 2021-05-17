@@ -85,6 +85,8 @@ mysql> flush privileges;
 and then a local docker container pointed at this local db. This should
 initialize the DB fully.
 
+Running this clean will take about 20 minutes locally.
+
 ```
 update-local-db.sh
 ```
