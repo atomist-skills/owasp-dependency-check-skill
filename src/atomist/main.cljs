@@ -304,7 +304,7 @@
        (<! (handler request))))))
 
 (defn scan-all [handler scan-handler]
-  (fn [{{data :data} :subscription
+  (fn [{{data :result} :subscription
         {dir :path} :project
         :as request}]
     (api/trace "scan-all")

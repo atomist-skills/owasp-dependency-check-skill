@@ -44,10 +44,10 @@
                           (println "scan " %)
                           %))
               (lein/add-lein-profiles))
-          {:subscription {:data [[{:git.commit/file
-                                   [{:git.file/path "atomist.sh" :git.file/sha "7e1200644d9081b58819051f188b626d14b88dde"}
-                                    {:git.file/path "docker/Dockerfile.gcr" :git.file/sha "847a86d7a63c6d8d92eb7b7ef49c9f35b774fbd1"}
-                                    {:git.file/path "project.clj" :git.file/sha "ad17799ed2d1a95bfaa4c452ceddbebc688ac774"}]}]]}
+          {:subscription {:result [[{:git.commit/file
+                                     [{:git.file/path "atomist.sh" :git.file/sha "7e1200644d9081b58819051f188b626d14b88dde"}
+                                      {:git.file/path "docker/Dockerfile.gcr" :git.file/sha "847a86d7a63c6d8d92eb7b7ef49c9f35b774fbd1"}
+                                      {:git.file/path "project.clj" :git.file/sha "ad17799ed2d1a95bfaa4c452ceddbebc688ac774"}]}]]}
            :project {:path "/Users/slim/atmhq/view-service"}}))
      (done))))
 
@@ -64,7 +64,7 @@
            #(go-safe
              (println "scan " %)
              %))
-          {:subscription {:data [[{:git.commit/file []}]]}
+          {:subscription {:result [[{:git.commit/file []}]]}
            :project {:path "/Users/slim/repo/demo-spring"}}))
      (<! ((scan-all
            #(go-safe
@@ -73,7 +73,7 @@
            #(go-safe
              (println "scan " %)
              %))
-          {:subscription {:data [[{:git.commit/file [{:git.file/path "unscannable"}]}]]}
+          {:subscription {:result [[{:git.commit/file [{:git.file/path "unscannable"}]}]]}
            :project {:path "/Users/slim/repo/demo-spring"}}))
      (done))))
 
@@ -92,7 +92,7 @@
           (is (= 179 (<! (async-count-stdout-lines "ls /Users/slim/atmhq/bot-service/to-scan"))))
           %))
        {:subscription
-        {:data [[{:git.commit/file [{:git.file/path "project.clj"}]} {}]]}
+        {:result [[{:git.commit/file [{:git.file/path "project.clj"}]} {}]]}
         :project
         {:path "/Users/slim/atmhq/bot-service"}}))
      (<!
@@ -104,7 +104,7 @@
           (is (= 46 (<! (async-count-stdout-lines "ls /Users/slim/repo/demo-spring/to-scan"))))
           %))
        {:subscription
-        {:data [[{:git.commit/file [{:git.file/path "pom.xml"}]} {}]]}
+        {:result [[{:git.commit/file [{:git.file/path "pom.xml"}]} {}]]}
         :project
         {:path "/Users/slim/repo/demo-spring"}}))
      (<!
@@ -119,7 +119,7 @@
           (is (= 48 (<! (async-count-stdout-lines "ls /Users/slim/skills/cljfmt-skill/to-scan"))))
           %))
        {:subscription
-        {:data [[{:git.commit/file [{:git.file/path "deps.edn"}]} {}]]}
+        {:result [[{:git.commit/file [{:git.file/path "deps.edn"}]} {}]]}
         :project
         {:path "/Users/slim/skills/cljfmt-skill"}}))
      (done))))
