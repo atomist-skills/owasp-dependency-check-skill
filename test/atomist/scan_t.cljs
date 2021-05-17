@@ -21,7 +21,8 @@
             [cljs.pprint :refer [pprint]]
             [cljs.test :refer-macros [deftest is async]]
             [cljs-node-io.proc :as proc]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [atomist.lein :as lein]))
 
 (enable-console-print!)
 
@@ -29,6 +30,26 @@
   [command]
   (go (let [[_ stdout _] (<! (proc/aexec command))]
          (count (s/split stdout "\n")))))
+
+(deftest scan-clj-tests
+  (async
+   done
+   (go
+     (<! ((-> #(go-safe
+                (println "finished:back " %)
+                (is (= 0 (-> % :atomist/status :code)))
+                (is (s/starts-with? (-> % :atomist/status :reason) "scanned 1 projects"))
+                %)
+              (scan-all #(go-safe
+                          (println "scan " %)
+                          %))
+              (lein/add-lein-profiles))
+          {:subscription {:data [[{:git.commit/file
+                                   [{:git.file/path "atomist.sh" :git.file/sha "7e1200644d9081b58819051f188b626d14b88dde"}
+                                    {:git.file/path "docker/Dockerfile.gcr" :git.file/sha "847a86d7a63c6d8d92eb7b7ef49c9f35b774fbd1"}
+                                    {:git.file/path "project.clj" :git.file/sha "ad17799ed2d1a95bfaa4c452ceddbebc688ac774"}]}]]}
+           :project {:path "/Users/slim/atmhq/view-service"}}))
+     (done))))
 
 (deftest unscannable-tests
   (async

@@ -317,6 +317,7 @@
                             :as commit} _]]
                        (->> files
                             (map (fn [{:git.file/keys [path] :as f}]
+                                   (log/info "check " path)
                                    (go-safe
                                     (<!
                                      ((wrap-skippable scan-handler)
@@ -337,9 +338,11 @@
                      data)
                     (async/merge)
                     (async/reduce conj [])))]
+       (log/info "scan report " scan-report)
        (let [real-scan-reports
              (->> scan-report
                   (filter (complement #(-> % :atomist/scannable :atomist/skipped))))]
+         (log/info "real scan reports " real-scan-reports)
          (<?
           (handler
            (assoc
