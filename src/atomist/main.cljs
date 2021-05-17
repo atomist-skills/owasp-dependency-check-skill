@@ -291,7 +291,7 @@
                            (-> (io/slurp (io/file (.getParentFile project-file) "dependency-check-report.json"))
                                (json/->obj)))))
        (catch :default ex
-         (log/errorf ex "Error %s\n%s" (.-message ex) (ex-data ex))
+         (log/errorf ex "Error %s\n%s" (.-message ex) (dissoc (ex-data ex) :args))
          (assoc request
                 :atomist/status {:code 1
                                  :reason (gstring/format "Scan failed:  %s" (.-message ex))}))))))
