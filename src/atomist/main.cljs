@@ -276,8 +276,8 @@
      (api/trace (str "run-scan on " project-file " for project " path))
      (try
        (let [command (.. js/process -env -DEPENDENCY_CHECK)
-             args ["--project" (gstring/format "%s://%s" (-> repo :git.repo/name) (.getPath :project-file))
-                   "--scan" (.getPath path)
+             args ["--project" (gstring/format "%s://%s" (-> repo :git.repo/name) (.getPath ^:js project-file))
+                   "--scan" (.getPath ^:js path)
                    "--format" "JSON"
                    "--noupdate"
                    "--connectionString" "\"jdbc:mysql://35.237.63.102:3306/dependencycheck?useSSL=false&allowPublicKeyRetrieval=true\""
@@ -338,18 +338,16 @@
                      data)
                     (async/merge)
                     (async/reduce conj [])))]
-       (log/info "scan report " scan-report)
        (let [real-scan-reports
              (->> scan-report
                   (filter (complement #(-> % :atomist/scannable :atomist/skipped))))]
-         (log/info "real scan reports " real-scan-reports)
          (<?
           (handler
            (assoc
             request
             :atomist/status
             {:code (if (some #(instance? js/Error %) real-scan-reports) 1 0)
-             :reason (gstring/format "scanned %d projects - %s" (count real-scan-reports) real-scan-reports)}))))))))
+             :reason (gstring/format "scanned %d projects - %s" (count real-scan-reports) (map :atomist/scannable real-scan-reports))}))))))))
 
 (defn update-nvd-db [handler]
   (fn [request]
