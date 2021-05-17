@@ -49,7 +49,5 @@ RUN npm run build \
 ENV JDBC_DRIVER_PATH=/root/.m2/repository/mysql/mysql-connector-java/8.0.21/mysql-connector-java-8.0.21.jar
 ENV DEPENDENCY_CHECK=/usr/share/dependency-check/bin/dependency-check.sh
 
-USER dependencycheck
-
 ENTRYPOINT [ "node" ]
 CMD [ "index.js" ]
