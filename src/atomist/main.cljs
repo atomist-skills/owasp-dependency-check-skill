@@ -329,7 +329,7 @@
                                        :atomist/file
                                        (assoc f
                                               :schema/entity "$project-file"
-                                              :schema/entity-type :git.commit/file)
+                                              :schema/entity-type :git/file)
                                        :atomist/org (:git.repo/org repo)
                                        :atomist/repo repo
                                        :atomist/commit commit
@@ -362,7 +362,7 @@
                    "--dbDriverPath" (.. js/process -env -JDBC_DRIVER_PATH)
                    "--dbPassword" (:nvd-mysql-password request)
                    "--dbUser" "root"]]
-         (<? (spawn command args)))
+         (<? (spawn command args (io/file (.. js/process -env -HOME)))))
 
        (<? (handler (assoc request :atomist/status {:code 0
                                                     :reason "update NVD database"})))
