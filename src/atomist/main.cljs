@@ -253,7 +253,6 @@
 
 (defn spawn [command args cwd]
   (go-safe
-   (log/info "args " args)
    (let [c (async/chan)
          p (proc/spawn command args {:cwd (.getPath cwd)})]
      (.on (.-stderr p) "data" (fn [d] (log/error d)))
