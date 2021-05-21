@@ -6,22 +6,23 @@ This page details all runtime dependencies of `atomist-skill`.
 
 ### Summary
 
-| License                         | Count |
-| ------------------------------- | ----- |
-| [0BSD](#0bsd)                   | 4     |
-| [Apache-2.0](#apache-20)        | 36    |
-| [BSD-2-Clause](#bsd-2-clause)   | 10    |
-| [BSD-3-Clause](#bsd-3-clause)   | 23    |
-| [CC-BY-4.0](#cc-by-40)          | 1     |
-| [CC0-1.0](#cc0-10)              | 2     |
-| [GPL-2.0](#gpl-20)              | 1     |
-| [GPL-3.0](#gpl-30)              | 1     |
-| [ISC](#isc)                     | 43    |
-| [MIT AND Zlib](#mit-and-zlib)   | 1     |
-| [MIT](#mit)                     | 587   |
-| [Public Domain](#public-domain) | 1     |
-| [Python-2.0](#python-20)        | 1     |
-| [UNKNOWN](#unknown)             | 1     |
+| License                                | Count |
+| -------------------------------------- | ----- |
+| [0BSD](#0bsd)                          | 4     |
+| [Apache-2.0](#apache-20)               | 36    |
+| [BSD-2-Clause](#bsd-2-clause)          | 10    |
+| [BSD-3-Clause](#bsd-3-clause)          | 23    |
+| [CC-BY-4.0](#cc-by-40)                 | 1     |
+| [CC0-1.0](#cc0-10)                     | 2     |
+| [GPL-2.0](#gpl-20)                     | 1     |
+| [GPL-3.0](#gpl-30)                     | 1     |
+| [ISC](#isc)                            | 43    |
+| [LGPL-3.0-or-later](#lgpl-30-or-later) | 1     |
+| [MIT AND Zlib](#mit-and-zlib)          | 1     |
+| [MIT](#mit)                            | 587   |
+| [Public Domain](#public-domain)        | 1     |
+| [Python-2.0](#python-20)               | 1     |
+| [UNKNOWN](#unknown)                    | 1     |
 
 #### 0BSD
 
@@ -207,6 +208,14 @@ ISC License - [https://www.isc.org/downloads/software-support-policy/isc-license
 | `yargs-parser`              | `18.1.3`  | Ben Coe            | [https://github.com/yargs/yargs-parser](https://github.com/yargs/yargs-parser)                               |
 | `yargs-parser`              | `20.2.7`  | Ben Coe            | [https://github.com/yargs/yargs-parser](https://github.com/yargs/yargs-parser)                               |
 
+#### LGPL-3.0-or-later
+
+GNU Lesser General Public License v3.0 or later - [https://www.gnu.org/licenses/lgpl-3.0-standalone.html](https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
+
+| Name                      | Version | Publisher           | Repository                                                                                                       |
+| ------------------------- | ------- | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `parse-docker-image-name` | `3.0.0` | William Blankenship | [https://github.com/retrohacker/parse-docker-image-name](https://github.com/retrohacker/parse-docker-image-name) |
+
 #### MIT
 
 MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
@@ -340,10 +349,10 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `@types/lodash.set`                                  | `4.3.6`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/lodash.sortby`                               | `4.7.6`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/lodash.uniq`                                 | `4.5.6`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
-| `@types/lodash`                                      | `4.14.169`     |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
+| `@types/lodash`                                      | `4.14.170`     |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/long`                                        | `4.0.1`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/node-fetch`                                  | `2.5.10`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
-| `@types/node`                                        | `15.3.1`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
+| `@types/node`                                        | `15.6.0`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/parse-json`                                  | `4.0.0`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/pluralize`                                   | `0.0.29`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/retry`                                       | `0.12.0`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
@@ -352,7 +361,7 @@ MIT License - [https://opensource.org/licenses/MIT](https://opensource.org/licen
 | `@types/uuid`                                        | `8.3.0`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/websocket`                                   | `1.0.2`        |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@types/yargs-parser`                                | `20.2.0`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
-| `@types/yargs`                                       | `16.0.2`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
+| `@types/yargs`                                       | `16.0.3`       |                                | [https://github.com/DefinitelyTyped/DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)                                                                                             |
 | `@vercel/ncc`                                        | `0.27.0`       |                                | [https://github.com/vercel/ncc](https://github.com/vercel/ncc)                                                                                                                                       |
 | `abort-controller`                                   | `3.0.0`        | Toru Nagashima                 | [https://github.com/mysticatea/abort-controller](https://github.com/mysticatea/abort-controller)                                                                                                     |
 | `agent-base`                                         | `6.0.2`        | Nathan Rajlich                 | [https://github.com/TooTallNate/node-agent-base](https://github.com/TooTallNate/node-agent-base)                                                                                                     |
@@ -825,7 +834,7 @@ Python License 2.0 - [https://opensource.org/licenses/Python-2.0](https://openso
 
 | Name                | Version  | Publisher       | Repository |
 | ------------------- | -------- | --------------- | ---------- |
-| `@atomist/api-cljs` | `0.5.63` | jim@atomist.com |            |
+| `@atomist/api-cljs` | `0.5.65` | jim@atomist.com |            |
 
 ## Contact
 
