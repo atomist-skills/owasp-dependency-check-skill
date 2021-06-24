@@ -17,11 +17,11 @@
                     :maven.repository/username
                     :maven.repository/repository-id])
  ?usage
- :in $ $before-db %
+ :in $ $before-db % ?ctx
  :where
- (get-config-value "other-files-to-index" ["project.clj" "deps.edn" "pom.xml"] ?path-exists)
- (get-config-value "path-not-exists" [] ?path-not-exists)
- (get-config-value "branch-filters" [] ?branch-filters)
+ (get-skill-config-value ?ctx "other-files-to-index" ["project.clj" "deps.edn" "pom.xml"] ?path-exists)
+ (get-skill-config-value ?ctx "path-not-exists" [] ?path-not-exists)
+ (get-get-config-value ?ctx "branch-filters" [] ?branch-filters)
 
  ;; (tx-push-with-content ?branch-filters false ?path-exists ?path-not-exists ?commit)
  ;; only enabled for Clojure
@@ -29,13 +29,13 @@
  ;; (repo-language ?repo "Clojure")
 
  ;; first, tx must contain one of the things we care about, or other content indexing could trigger this
- (or-join [?commit ?path-exists ?path-not-exists]
+ (or-join [?ctx ?commit ?path-exists ?path-not-exists]
           (and
-           (tx-entity-attr-value :git.commit/file ?commit ?file)
+           (attributes-tx ?ctx ?commit :git.commit/file ?file)
            [?file :git.file/path ?file-path]
            (array-contains? ?path-exists ?file-path))
           (and
-           (tx-entity-attr-value :git.commit/not-file-paths ?commit ?file-path)
+           (attributes-tx ?commit :git.commit/not-file-paths ?file-path)
            (array-contains? ?path-not-exists ?file-path)))
 
  ;; if path-not-exists is empty or the commit has none of the not-contains-paths
@@ -44,20 +44,23 @@
           (files-not-exist? ?commit ?path-not-exists))
  [?commit :git.commit/repo ?repo]
  ;; apply repo filter
- (repo-selected? ?repo)
+ (skill-repo-selected? ?ctx ?repo)
  ;; check branch filters
  [(ground false) ?default-only]
  [?ref :git.ref/commit ?commit]
  (or-join [?ref ?default-only ?branch-filters]
           (and
+           ;; TODO - this can never be true
            [(true? ?default-only)]
            (is-default-branch? ?ref))
           (and
+           ;; this is always ture
            [(false? ?default-only)]
            [?ref :git.ref/name ?branch-name]
            (array-contains? ?branch-filters ?branch-name))
           (and
+           ;; this is always true
            [(false? ?default-only)]
            [(empty? ?branch-filters)]))
  ;; get the maven capability
- (capability-configuration "atomist" "MavenRepository" ?usage ?maven-repo)]
+ (skill-capability-configuration ?ctx "atomist" "MavenRepository" ?usage ?maven-repo)]
