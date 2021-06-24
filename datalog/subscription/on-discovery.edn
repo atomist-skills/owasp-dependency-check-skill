@@ -35,7 +35,7 @@
                     :package.dependency/fileName]}
                   :package.evidence/confidence
                   :package.evidence/source
-                  {:package.evidence/purl 
+                  {:package.evidence/purl
                    [:package.url/url
                     {:package.url/cves
                      [:vulnerability.cve/source
@@ -49,9 +49,9 @@
                       :vulnerability.cve/cvss-score
                       :vulnerability.cve/severity
                       :vulnerability.cve/source-id]}]}])
- :in $ $before %
+ :in $ $before % ?ctx
  :where
- (tx-entity-attr-value :dependency.analysis.discovery/status ?discovery ?status)
+ (attributes-tx ?ctx ?discovery :dependency.analysis.discovery/status ?status)
  [?discovery :dependency.analysis.discovery/status :dependency.analysis.discovery.status/COMPLETE]
  [?discovery :dependency.analysis.discovery/source :dependency.analysis.discovery.source/OWASP_DEPENDENCY_SCANNER]
  [?discovery :dependency.analysis.discovery/commit ?commit]
