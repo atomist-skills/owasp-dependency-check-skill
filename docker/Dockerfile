@@ -1,5 +1,5 @@
 # hadolint ignore=DL3007
-FROM owasp/dependency-check:latest@sha256:1b4eda20cbe85716517a3ce570594cc0f8c093499242c7ff3b04d4dc352d65e9
+FROM owasp/dependency-check:latest@sha256:66fd7892865faf9e7d39454275dd8d6d3ef987f4377ce374275526e295743e23
 
 USER root
 
