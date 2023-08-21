@@ -52,3 +52,8 @@ ENV DEPENDENCY_CHECK=/usr/share/dependency-check/bin/dependency-check.sh
 
 ENTRYPOINT [ "node" ]
 CMD [ "index.js" ]
+
+# atomist-start: fix for https://dso.atomist.com/T29E48P34/overview/cve/CVE-2022-0778
+RUN apk add --no-cache \
+  libretls=3.3.3p1-r3
+# atomist-end
